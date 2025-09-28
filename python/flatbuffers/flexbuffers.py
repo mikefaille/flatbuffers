@@ -14,7 +14,7 @@
 # limitations under the License.
 """Implementation of FlexBuffers binary format.
 
-For more info check https://google.github.io/flatbuffers/flexbuffers.html and
+For more info check https://flatbuffers.dev/flexbuffers.html and
 corresponding C++ implementation at
 https://github.com/google/flatbuffers/blob/master/include/flatbuffers/flexbuffers.h
 """

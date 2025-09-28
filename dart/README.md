@@ -1,6 +1,6 @@
 # FlatBuffers for Dart
 
-This package is used to read and write [FlatBuffers](https://google.github.io/flatbuffers/).
+This package is used to read and write [FlatBuffers](https://flatbuffers.dev).
 
 Most consumers will want to use the [`flatc` - FlatBuffer compiler](https://github.com/google/flatbuffers) binary for your platform.
 You can download the flatc version matching your dart package version from [GitHub releases](https://github.com/google/flatbuffers/releases).
@@ -11,5 +11,5 @@ other languages and platforms supported by FlatBuffers, as illustrated in the `e
 examples folder.
 
 For more details and documentation, head over to the official site and read the
-[Tutorial](https://google.github.io/flatbuffers/flatbuffers_guide_tutorial.html) and how to
-[use FlatBuffers in Dart](https://google.github.io/flatbuffers/flatbuffers_guide_use_dart.html).
+[Tutorial](https://flatbuffers.dev/tutorial.html) and how to
+[use FlatBuffers in Dart](https://flatbuffers.dev/languages/dart.html).

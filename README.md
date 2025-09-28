@@ -112,5 +112,5 @@ Please see our [Security Policy](SECURITY.md) for reporting vulnerabilities.
    [FlatBuffers Google Group]: https://groups.google.com/forum/#!forum/flatbuffers
    [FlatBuffers Issues Tracker]: http://github.com/google/flatbuffers/issues
    [stackoverflow.com]: http://stackoverflow.com/search?q=flatbuffers
-   [landing page]: https://google.github.io/flatbuffers
+   [landing page]: https://flatbuffers.dev
    [LICENSE]: https://github.com/google/flatbuffers/blob/master/LICENSE

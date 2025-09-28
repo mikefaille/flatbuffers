@@ -20,10 +20,10 @@ setup(
     license='Apache 2.0',
     author='Derek Bailey',
     author_email='derekbailey@google.com',
-    url='https://google.github.io/flatbuffers/',
+    url='https://flatbuffers.dev',
     long_description=(
         'Python runtime library for use with the '
-        '`Flatbuffers <https://google.github.io/flatbuffers/>`_ '
+        '`Flatbuffers <https://flatbuffers.dev>`_ '
         'serialization format.'
     ),
     packages=['flatbuffers'],
@@ -40,7 +40,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     project_urls={
-        'Documentation': 'https://google.github.io/flatbuffers/',
+        'Documentation': 'https://flatbuffers.dev',
         'Source': 'https://github.com/google/flatbuffers',
     },
 )

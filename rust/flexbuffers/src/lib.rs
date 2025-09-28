@@ -14,7 +14,7 @@
 
 //! Flexbuffers is a high performance schemaless binary data format designed at Google.
 //! It is complementary to the schema-ed format [Flatbuffers](http://docs.rs/flatbuffers/).
-//! See [Flexbuffer Internals](https://google.github.io/flatbuffers/flatbuffers_internals.html)
+//! See [Flexbuffer Internals](https://flatbuffers.dev/internals.html)
 //! for details on the binary format.
 //!
 //! See the examples for usage:
