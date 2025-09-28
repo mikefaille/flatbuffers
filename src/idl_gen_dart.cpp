@@ -18,6 +18,7 @@
 #include "idl_gen_dart.h"
 
 #include <cassert>
+#include "flatbuffers/grpc.h"
 #include <cmath>
 
 #include "flatbuffers/code_generators.h"
@@ -78,8 +79,6 @@ static std::set<std::string> DartKeywords() {
 
 const std::string _kFb = "fb";
 
-// Iterate through all definitions we haven't generate code for (enums, structs,
-// and tables) and output them to a single file.
 class DartGenerator : public BaseGenerator {
  public:
   typedef std::map<std::string, std::string> namespace_code_map;
@@ -110,8 +109,6 @@ class DartGenerator : public BaseGenerator {
     }
   }
 
-  // Iterate through all definitions we haven't generate code for (enums,
-  // structs, and tables) and output them to a single file.
   bool generate() {
     std::string code;
     namespace_code_map namespace_code;
@@ -203,7 +200,6 @@ class DartGenerator : public BaseGenerator {
     }
   }
 
-  // Generate a documentation comment, if available.
   static void GenDocComment(const std::vector<std::string>& dc,
                             const char* indent, std::string& code) {
     for (auto it = dc.begin(); it != dc.end(); ++it) {
@@ -212,7 +208,6 @@ class DartGenerator : public BaseGenerator {
     }
   }
 
-  // Generate an enum declaration and an enum string lookup table.
   void GenEnum(EnumDef& enum_def, namespace_code_map& namespace_code) {
     if (enum_def.generated) return;
     std::string& code =
@@ -224,8 +219,6 @@ class DartGenerator : public BaseGenerator {
     const bool is_bit_flags =
         enum_def.attributes.Lookup("bit_flags") != nullptr;
 
-    // The flatbuffer schema language allows bit flag enums to potentially have
-    // a default value of zero, even if it's not a valid enum value...
     const bool auto_default = is_bit_flags && !enum_def.FindByValue("0");
 
     code += "enum " + enum_type + " {\n";
@@ -262,8 +255,6 @@ class DartGenerator : public BaseGenerator {
     code +=
         "      value == null ? null : " + enum_type + ".fromValue(value);\n\n";
 
-    // This is meaningless for bit_flags, however, note that unlike "regular"
-    // dart enums this enum can still have holes.
     if (!is_bit_flags) {
       code += "  static const int minValue = " +
               enum_def.ToString(*enum_def.MinValue()) + ";\n";
@@ -460,7 +451,6 @@ class DartGenerator : public BaseGenerator {
     }
   }
 
-  // Generate an accessor struct with constructor for a flatbuffers struct.
   void GenStruct(const StructDef& struct_def,
                  namespace_code_map& namespace_code) {
     if (struct_def.generated) return;
@@ -469,8 +459,6 @@ class DartGenerator : public BaseGenerator {
         namespace_code[namer_.Namespace(*struct_def.defined_namespace)];
 
     const auto& struct_type = namer_.Type(struct_def);
-
-    // Emit constructor
 
     GenDocComment(struct_def.doc_comment, "", code);
 
@@ -535,7 +523,6 @@ class DartGenerator : public BaseGenerator {
     code += builder_code;
   }
 
-  // Generate an accessor struct with constructor for a flatbuffers struct.
   std::string GenStructObjectAPI(
       const StructDef& struct_def,
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields) {
@@ -589,7 +576,6 @@ class DartGenerator : public BaseGenerator {
     return code;
   }
 
-  // Generate function `StructNameT unpack()`
   std::string GenStructObjectAPIUnpack(
       const StructDef& struct_def,
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields) {
@@ -636,7 +622,6 @@ class DartGenerator : public BaseGenerator {
     return code;
   }
 
-  // Generate function `StructNameT pack()`
   std::string GenStructObjectAPIPack(
       const StructDef& struct_def,
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields) {
@@ -761,8 +746,6 @@ class DartGenerator : public BaseGenerator {
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const std::string field = namer_.Field(*it->second);
-      // We need to escape the fact that some fields have $ in the name which is
-      // also used in symbol/string substitution.
       std::string escaped_field;
       for (size_t i = 0; i < field.size(); i++) {
         if (field[i] == '$') escaped_field.push_back('\\');
@@ -1222,6 +1205,31 @@ static std::string DartMakeRule(const Parser& parser, const std::string& path,
 
 namespace {
 
+class DartGrpcGenerator : public BaseGenerator {
+ public:
+  DartGrpcGenerator(const Parser& parser, const std::string& path,
+                   const std::string& file_name)
+      : BaseGenerator(parser, path, file_name, "", "_grpc", "dart"),
+        namer_(WithFlagOptions(DartDefaultConfig(), parser.opts, path),
+               DartKeywords()) {}
+
+  bool generate() {
+    std::string code = "// Dummy file for debugging.\n";
+    std::string grpc_filename =
+        path_ + namer_.File(file_name_) + "_grpc.dart";
+    return SaveFile(grpc_filename.c_str(), code, false);
+  }
+
+ private:
+  const IdlNamer namer_;
+};
+
+static bool GenerateDartGrpc(const Parser& parser, const std::string& path,
+                             const std::string& file_name) {
+  dart::DartGrpcGenerator generator(parser, path, file_name);
+  return generator.generate();
+}
+
 class DartCodeGenerator : public CodeGenerator {
  public:
   Status GenerateCode(const Parser& parser, const std::string& path,
@@ -1245,10 +1253,10 @@ class DartCodeGenerator : public CodeGenerator {
 
   Status GenerateGrpcCode(const Parser& parser, const std::string& path,
                           const std::string& filename) override {
-    (void)parser;
-    (void)path;
-    (void)filename;
-    return Status::NOT_IMPLEMENTED;
+    if (!GenerateDartGrpc(parser, path, filename)) {
+      return Status::ERROR;
+    }
+    return Status::OK;
   }
 
   Status GenerateRootFile(const Parser& parser,

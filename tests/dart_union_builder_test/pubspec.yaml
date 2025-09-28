@@ -1,5 +1,0 @@
-name: dart_union_builder_test
-environment:
-  sdk: '>=2.12.0 <3.0.0'
-dependencies:
-  flat_buffers: any

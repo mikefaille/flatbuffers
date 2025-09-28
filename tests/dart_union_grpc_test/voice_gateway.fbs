@@ -1,0 +1,59 @@
+namespace zenith.voice;
+
+table TextInput {
+  text: string;
+  confidence: float;
+}
+
+table AudioChunk {
+  data: [ubyte];
+  sample_rate: uint32;
+}
+
+table CallEvent {
+  event_type: uint32;
+  metadata: string;
+}
+
+table StringValue { value: string; }
+
+union Payload {
+  TextInput,
+  AudioChunk,
+  CallEvent,
+  StringValue
+}
+
+table AgentRequest {
+  session_id: string;
+  payload: Payload;
+  timestamp: uint64;
+}
+
+table TextOutput {
+  text: string;
+  emotion: uint32;
+}
+
+table AudioResponse {
+  data: [ubyte];
+  format: string;
+}
+
+union ResponsePayload {
+  TextOutput,
+  AudioResponse
+}
+
+table AgentResponse {
+  session_id: string;
+  payload: ResponsePayload;
+  confidence: float;
+}
+
+rpc_service VoiceGateway {
+  ProcessRequest(AgentRequest): AgentResponse;
+  StreamAudio(AgentRequest): AgentResponse (streaming: "server");
+}
+
+root_type AgentRequest;
