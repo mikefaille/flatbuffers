@@ -20,7 +20,7 @@
 /// Flexbuffers via the [Pushable](trait.Pushable.html) trait.
 ///
 /// For exact details see the [internals document](
-/// https://google.github.io/flatbuffers/flatbuffers_internals.html)
+/// https://flatbuffers.dev/internals.html)
 ///
 /// ### Notes:
 /// * In the binary format, Each element of a `Map` or (heterogenous) `Vector`

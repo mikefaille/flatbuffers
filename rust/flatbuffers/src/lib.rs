@@ -19,7 +19,7 @@
 //! A library for memory-efficient serialization of data.
 //!
 //! This crate provides runtime support for the FlatBuffers format in the Rust programming language.
-//! To use this crate, first generate code with the `flatc` compiler, as described here: <https://google.github.io/flatbuffers/>
+//! To use this crate, first generate code with the `flatc` compiler, as described here: <https://flatbuffers.dev>
 //! Then, include that code into your project.
 //! Finally, add this crate to your `Cargo.toml`.
 //!

@@ -1,6 +1,6 @@
 # Flexbuffers
 
-[Flexbuffers](https://google.github.io/flatbuffers/flexbuffers.html) is a
+[Flexbuffers](https://flatbuffers.dev/flexbuffers.html) is a
 schema-less binary format developed at Google. FlexBuffers can be accessed
 without parsing, copying, or allocation. This is a huge win for efficiency,
 memory friendly-ness, and allows for unique use cases such as mmap-ing large
@@ -19,4 +19,4 @@ Rust data structures into its binary format.
 * [Documentation](https://docs.rs/flexbuffers)
 
 Flexbuffers is the schema-less cousin of
-[Flatbuffers](https://google.github.io/flatbuffers/).
+[Flatbuffers](https://flatbuffers.dev).

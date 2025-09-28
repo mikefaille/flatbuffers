@@ -7,8 +7,8 @@ compatibility. It was originally created at Google for game development and
 other performance-critical applications.
 
 ## See our
-* [Tutorial](https://google.github.io/flatbuffers/flatbuffers_guide_tutorial.html)
-* [Landing Page](https://google.github.io/flatbuffers/)
+* [Tutorial](https://flatbuffers.dev/tutorial.html)
+* [Landing Page](https://flatbuffers.dev)
 * [Rust sample binary](https://github.com/google/flatbuffers/blob/master/samples/sample_binary.rs)
 * [Schema**less** format, Flexbuffers](https://crates.io/crates/flexbuffers)
 * [Github](https://github.com/google/flatbuffers)
