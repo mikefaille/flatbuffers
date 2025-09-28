@@ -1,0 +1,21 @@
+{
+  "roots": [
+    "dart_union_builder_test"
+  ],
+  "packages": [
+    {
+      "name": "dart_union_builder_test",
+      "version": "0.0.0",
+      "dependencies": [
+        "flat_buffers"
+      ],
+      "devDependencies": []
+    },
+    {
+      "name": "flat_buffers",
+      "version": "23.5.26",
+      "dependencies": []
+    }
+  ],
+  "configVersion": 1
+}

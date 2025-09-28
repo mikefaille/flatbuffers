@@ -1013,6 +1013,45 @@ class DartGenerator : public BaseGenerator {
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
 
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        const auto field_name = namer_.Variable(field);
+        const auto off_name = field_name + "Offset";
+        const auto field_var = (prependUnderscore ? "_" : "") + field_name;
+        const auto type_field_var = field_var + "Type";
+
+        code += "    var " + off_name + " = 0;\n";
+        code += "    if (" + field_var + " != null && " + type_field_var +
+                " != null) {\n";
+
+        const EnumDef& uenum = *field.value.type.enum_def;
+        for (auto it_enum = uenum.Vals().begin(); it_enum != uenum.Vals().end();
+             ++it_enum) {
+          const EnumVal& uval = **it_enum;
+          if (uval.union_type.base_type == BASE_TYPE_NONE) continue;
+
+          code += "      if (" + type_field_var + " == " +
+                  namer_.Type(uenum) + "TypeId." + namer_.Variant(uval) +
+                  ") {\n";
+
+          if (uval.union_type.base_type == BASE_TYPE_STRUCT &&
+              uval.union_type.struct_def &&
+              !uval.union_type.struct_def->fixed) {
+            code += "        " + off_name + " = (" + field_var + " as " +
+                    namer_.Type(*uval.union_type.struct_def) +
+                    "ObjectBuilder)." + (pack ? "pack" : "finish") +
+                    "(fbBuilder);\n";
+          } else if (uval.union_type.base_type == BASE_TYPE_STRING) {
+            code += "        " + off_name + " = fbBuilder.writeString(" +
+                    field_var + " as String);\n";
+          } else {
+            code += "        // TODO: unsupported union member for Dart\n";
+          }
+          code += "      }\n";
+        }
+        code += "    }\n";
+        continue;
+      }
+
       if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type))
         continue;
 
@@ -1132,7 +1171,10 @@ class DartGenerator : public BaseGenerator {
       std::string field_var =
           (prependUnderscore ? "_" : "") + namer_.Variable(field);
 
-      if (IsScalar(field.value.type.base_type)) {
+      if (field.value.type.base_type == BASE_TYPE_UTYPE) {
+        code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
+                NumToString(offset) + ", " + field_var + "?.value ?? 0);\n";
+      } else if (IsScalar(field.value.type.base_type)) {
         code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
                 NumToString(offset) + ", " + field_var;
         if (field.value.type.enum_def) {
