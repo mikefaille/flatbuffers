@@ -1,0 +1,6 @@
+name: smoke_test
+environment:
+  sdk: '>=2.12.0 <4.0.0'
+
+dependencies:
+  flat_buffers: ^2.0.0
