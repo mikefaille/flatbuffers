@@ -2,18 +2,24 @@
 // ignore_for_file: unused_import, unused_field, unused_element, unused_local_variable, constant_identifier_names
 
 import 'dart:typed_data' show Uint8List;
-
 import 'package:flat_buffers/flat_buffers.dart' as fb;
 
-enum OptionsEnum {
-  A(1),
-  B(2),
-  C(3);
 
+class OptionsEnum {
   final int value;
-  const OptionsEnum(this.value);
+  const OptionsEnum._(this.value);
 
-  factory OptionsEnum.fromValue(int value) {
+  static const OptionsEnum A = OptionsEnum._(1);
+  static const OptionsEnum B = OptionsEnum._(2);
+  static const OptionsEnum C = OptionsEnum._(3);
+
+  static const fb.Reader<OptionsEnum> reader = _OptionsEnumReader();
+
+  static OptionsEnum? _createOrNull(int? value) =>
+    value == null ? null
+    : OptionsEnum.fromValue(value);
+
+  static OptionsEnum fromValue(int value) {
     switch (value) {
       case 1:
         return OptionsEnum.A;
@@ -22,16 +28,12 @@ enum OptionsEnum {
       case 3:
         return OptionsEnum.C;
       default:
-        throw StateError('Invalid value $value for bit flag enum');
+        throw StateError('Invalid value $value for enum OptionsEnum');
     }
   }
 
-  static OptionsEnum? _createOrNull(int? value) =>
-      value == null ? null : OptionsEnum.fromValue(value);
-
   static const int minValue = 1;
   static const int maxValue = 3;
-  static const fb.Reader<OptionsEnum> reader = _OptionsEnumReader();
 }
 
 class _OptionsEnumReader extends fb.Reader<OptionsEnum> {
@@ -57,9 +59,7 @@ class MyTable {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  List<OptionsEnum>? get options => const fb.ListReader<OptionsEnum>(
-    OptionsEnum.reader,
-  ).vTableGetNullable(_bc, _bcOffset, 4);
+  List<OptionsEnum>? get options => const fb.ListReader<OptionsEnum>(OptionsEnum.reader).vTableGetNullable(_bc, _bcOffset, 4);
 
   @override
   String toString() {
@@ -67,11 +67,7 @@ class MyTable {
   }
 
   MyTableT unpack() => MyTableT(
-    options: const fb.ListReader<OptionsEnum>(
-      OptionsEnum.reader,
-      lazy: false,
-    ).vTableGetNullable(_bc, _bcOffset, 4),
-  );
+      options: options);
 
   static int pack(fb.Builder fbBuilder, MyTableT? object) {
     if (object == null) return 0;
@@ -82,12 +78,13 @@ class MyTable {
 class MyTableT implements fb.Packable {
   List<OptionsEnum>? options;
 
-  MyTableT({this.options});
+  MyTableT({
+      List<OptionsEnum>? options
+  }) : this.options = options;
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? optionsOffset = options == null
-        ? null
+    final int? optionsOffset = options == null ? null
         : fbBuilder.writeListUint32(options!.map((f) => f.value).toList());
     fbBuilder.startTable(1);
     fbBuilder.addOffset(0, optionsOffset);
@@ -105,7 +102,7 @@ class _MyTableReader extends fb.TableReader<MyTable> {
 
   @override
   MyTable createObject(fb.BufferContext bc, int offset) =>
-      MyTable._(bc, offset);
+    MyTable._(bc, offset);
 }
 
 class MyTableBuilder {
@@ -128,16 +125,17 @@ class MyTableBuilder {
 }
 
 class MyTableObjectBuilder extends fb.ObjectBuilder {
-  final List<OptionsEnum>? _options;
+  final List<OptionsEnum>? options;
 
-  MyTableObjectBuilder({List<OptionsEnum>? options}) : _options = options;
+  MyTableObjectBuilder({
+    this.options
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? optionsOffset = _options == null
-        ? null
-        : fbBuilder.writeListUint32(_options!.map((f) => f.value).toList());
+    final int? optionsOffset = options == null ? null
+        : fbBuilder.writeListUint32(options!.map((f) => f.value).toList());
     fbBuilder.startTable(1);
     fbBuilder.addOffset(0, optionsOffset);
     return fbBuilder.endTable();

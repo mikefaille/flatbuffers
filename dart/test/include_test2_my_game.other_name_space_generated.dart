@@ -4,32 +4,34 @@
 library my_game.other_name_space;
 
 import 'dart:typed_data' show Uint8List;
-
 import 'package:flat_buffers/flat_buffers.dart' as fb;
+
 
 import './include_test1_generated.dart';
 
-enum FromInclude {
-  IncludeVal(0);
-
+class FromInclude {
   final int value;
-  const FromInclude(this.value);
+  const FromInclude._(this.value);
 
-  factory FromInclude.fromValue(int value) {
+  static const FromInclude IncludeVal = FromInclude._(0);
+
+  static const fb.Reader<FromInclude> reader = _FromIncludeReader();
+
+  static FromInclude? _createOrNull(int? value) =>
+    value == null ? null
+    : FromInclude.fromValue(value);
+
+  static FromInclude fromValue(int value) {
     switch (value) {
       case 0:
         return FromInclude.IncludeVal;
       default:
-        throw StateError('Invalid value $value for bit flag enum');
+        throw StateError('Invalid value $value for enum FromInclude');
     }
   }
 
-  static FromInclude? _createOrNull(int? value) =>
-      value == null ? null : FromInclude.fromValue(value);
-
   static const int minValue = 0;
   static const int maxValue = 0;
-  static const fb.Reader<FromInclude> reader = _FromIncludeReader();
 }
 
 class _FromIncludeReader extends fb.Reader<FromInclude> {
@@ -58,7 +60,8 @@ class Unused {
     return 'Unused{a: ${a}}';
   }
 
-  UnusedT unpack() => UnusedT(a: a);
+  UnusedT unpack() => UnusedT(
+      a: a);
 
   static int pack(fb.Builder fbBuilder, UnusedT? object) {
     if (object == null) return 0;
@@ -69,7 +72,9 @@ class Unused {
 class UnusedT implements fb.Packable {
   int a;
 
-  UnusedT({required this.a});
+  UnusedT({
+      required int a
+  }) : this.a = a;
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -90,7 +95,8 @@ class _UnusedReader extends fb.StructReader<Unused> {
   int get size => 4;
 
   @override
-  Unused createObject(fb.BufferContext bc, int offset) => Unused._(bc, offset);
+  Unused createObject(fb.BufferContext bc, int offset) =>
+    Unused._(bc, offset);
 }
 
 class UnusedBuilder {
@@ -102,17 +108,20 @@ class UnusedBuilder {
     fbBuilder.putInt32(a);
     return fbBuilder.offset;
   }
+
 }
 
 class UnusedObjectBuilder extends fb.ObjectBuilder {
-  final int _a;
+  final int a;
 
-  UnusedObjectBuilder({required int a}) : _a = a;
+  UnusedObjectBuilder({
+    this.a
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    fbBuilder.putInt32(_a);
+    fbBuilder.putInt32(a);
     return fbBuilder.offset;
   }
 
@@ -124,7 +133,6 @@ class UnusedObjectBuilder extends fb.ObjectBuilder {
     return fbBuilder.buffer;
   }
 }
-
 class TableB {
   TableB._(this._bc, this._bcOffset);
   factory TableB(List<int> bytes) {
@@ -144,7 +152,8 @@ class TableB {
     return 'TableB{a: ${a}}';
   }
 
-  TableBT unpack() => TableBT(a: a?.unpack());
+  TableBT unpack() => TableBT(
+      a: a?.unpack());
 
   static int pack(fb.Builder fbBuilder, TableBT? object) {
     if (object == null) return 0;
@@ -155,7 +164,9 @@ class TableB {
 class TableBT implements fb.Packable {
   TableAT? a;
 
-  TableBT({this.a});
+  TableBT({
+      TableAT? a
+  }) : this.a = a;
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -175,7 +186,8 @@ class _TableBReader extends fb.TableReader<TableB> {
   const _TableBReader();
 
   @override
-  TableB createObject(fb.BufferContext bc, int offset) => TableB._(bc, offset);
+  TableB createObject(fb.BufferContext bc, int offset) =>
+    TableB._(bc, offset);
 }
 
 class TableBBuilder {
@@ -198,14 +210,16 @@ class TableBBuilder {
 }
 
 class TableBObjectBuilder extends fb.ObjectBuilder {
-  final TableAObjectBuilder? _a;
+  final TableAObjectBuilder? a;
 
-  TableBObjectBuilder({TableAObjectBuilder? a}) : _a = a;
+  TableBObjectBuilder({
+    this.a
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? aOffset = _a?.getOrCreateOffset(fbBuilder);
+    final int? aOffset = a?.getOrCreateOffset(fbBuilder);
     fbBuilder.startTable(1);
     fbBuilder.addOffset(0, aOffset);
     return fbBuilder.endTable();

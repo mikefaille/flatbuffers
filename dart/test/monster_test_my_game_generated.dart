@@ -4,12 +4,12 @@
 library my_game;
 
 import 'dart:typed_data' show Uint8List;
-
 import 'package:flat_buffers/flat_buffers.dart' as fb;
 
-import './include_test1_generated.dart';
-import './monster_test_my_game.example2_generated.dart' as my_game_example2;
 import './monster_test_my_game.example_generated.dart' as my_game_example;
+import './monster_test_my_game.example2_generated.dart' as my_game_example2;
+
+import './include_test1_generated.dart';
 
 class InParentNamespace {
   InParentNamespace._(this._bc, this._bcOffset);
@@ -22,6 +22,7 @@ class InParentNamespace {
 
   final fb.BufferContext _bc;
   final int _bcOffset;
+
 
   @override
   String toString() {
@@ -54,11 +55,14 @@ class _InParentNamespaceReader extends fb.TableReader<InParentNamespace> {
 
   @override
   InParentNamespace createObject(fb.BufferContext bc, int offset) =>
-      InParentNamespace._(bc, offset);
+    InParentNamespace._(bc, offset);
 }
 
 class InParentNamespaceObjectBuilder extends fb.ObjectBuilder {
-  InParentNamespaceObjectBuilder();
+
+  InParentNamespaceObjectBuilder({
+
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
