@@ -168,9 +168,9 @@ class Vec3ObjectBuilder extends fb.ObjectBuilder {
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    fbBuilder.putFloat32(_z);
-    fbBuilder.putFloat32(_y);
-    fbBuilder.putFloat32(_x);
+    fbBuilder.putFloat32(z);
+    fbBuilder.putFloat32(y);
+    fbBuilder.putFloat32(x);
     return fbBuilder.offset;
   }
 
@@ -259,32 +259,32 @@ class MonsterT implements fb.Packable {
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? nameOffset = _name == null ? null
-        : fbBuilder.writeString(_name!);
-    final int? inventoryOffset = _inventory == null ? null
-        : fbBuilder.writeListUint8(_inventory!);
-    final int? weaponsOffset = _weapons == null ? null
-        : fbBuilder.writeList(_weapons!.map((b) => b.pack(fbBuilder)).toList());
+    final int? nameOffset = name == null ? null
+        : fbBuilder.writeString(name!);
+    final int? inventoryOffset = inventory == null ? null
+        : fbBuilder.writeListUint8(inventory!);
+    final int? weaponsOffset = weapons == null ? null
+        : fbBuilder.writeList(weapons!.map((b) => b.pack(fbBuilder)).toList());
     var equippedOffset = 0;
-    if (_equipped != null && _equippedType != null) {
-      if (_equippedType == EquipmentTypeId.Weapon) {
-        equippedOffset = (_equipped as WeaponObjectBuilder).pack(fbBuilder);
+    if (equipped != null && equippedType != null) {
+      if (equippedType == EquipmentTypeId.Weapon) {
+        equippedOffset = (equipped as WeaponT).pack(fbBuilder);
       }
     }
     int? pathOffset;
-    if (_path != null) {
-      for (var e in _path!) { e.pack(fbBuilder); }
-      pathOffset = fbBuilder.endStructVector(_path!.length);
+    if (path != null) {
+      for (var e in path!) { e.pack(fbBuilder); }
+      pathOffset = fbBuilder.endStructVector(path!.length);
     }
     fbBuilder.startTable(11);
-    if (_pos != null) {
-      fbBuilder.addStruct(0, _pos!.pack(fbBuilder));
+    if (pos != null) {
+      fbBuilder.addStruct(0, pos!.pack(fbBuilder));
     }
-    fbBuilder.addInt16(1, _mana);
-    fbBuilder.addInt16(2, _hp);
+    fbBuilder.addInt16(1, mana);
+    fbBuilder.addInt16(2, hp);
     fbBuilder.addOffset(3, nameOffset);
     fbBuilder.addOffset(5, inventoryOffset);
-    fbBuilder.addInt8(6, _color.value);
+    fbBuilder.addInt8(6, color.value);
     fbBuilder.addOffset(7, weaponsOffset);
     fbBuilder.addUint8(8, equippedType?.value ?? 0);
     fbBuilder.addOffset(9, equippedOffset);
@@ -467,11 +467,11 @@ class WeaponT implements fb.Packable {
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? nameOffset = _name == null ? null
-        : fbBuilder.writeString(_name!);
+    final int? nameOffset = name == null ? null
+        : fbBuilder.writeString(name!);
     fbBuilder.startTable(2);
     fbBuilder.addOffset(0, nameOffset);
-    fbBuilder.addInt16(1, _damage);
+    fbBuilder.addInt16(1, damage);
     return fbBuilder.endTable();
   }
 
