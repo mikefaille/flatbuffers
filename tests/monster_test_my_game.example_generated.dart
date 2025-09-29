@@ -1194,6 +1194,7 @@ class Monster {
       inventory: const fb.Uint8ListReader(lazy: false).vTableGetNullable(_bc, _bcOffset, 14),
       color: color,
       testType: testType,
+      test: testType: testType,
       test: test,
       test4: test4?.map((e) => e.unpack()).toList(),
       testarrayofstring: const fb.ListReader<String>(fb.StringReader(), lazy: false).vTableGetNullable(_bc, _bcOffset, 24),
@@ -1230,8 +1231,10 @@ class Monster {
       nonOwningReference: nonOwningReference,
       vectorOfNonOwningReferences: const fb.ListReader<int>(fb.Uint64Reader(), lazy: false).vTableGetNullable(_bc, _bcOffset, 88),
       anyUniqueType: anyUniqueType,
+      anyUnique: anyUniqueType: anyUniqueType,
       anyUnique: anyUnique,
       anyAmbiguousType: anyAmbiguousType,
+      anyAmbiguous: anyAmbiguousType: anyAmbiguousType,
       anyAmbiguous: anyAmbiguous,
       vectorOfEnums: const fb.ListReader<Color>(Color.reader, lazy: false).vTableGetNullable(_bc, _bcOffset, 98),
       signedEnum: signedEnum,
@@ -1393,12 +1396,21 @@ class MonsterT implements fb.Packable {
     var testOffset = 0;
     if (test != null && testType != null) {
       if (testType == AnyTypeId.Monster) {
+        if (test is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         testOffset = (test as MonsterT).pack(fbBuilder);
       }
  else if (testType == AnyTypeId.TestSimpleTableWithEnum) {
+        if (test is! TestSimpleTableWithEnumT) {
+          throw ArgumentError('Invalid union type');
+        }
         testOffset = (test as TestSimpleTableWithEnumT).pack(fbBuilder);
       }
  else if (testType == AnyTypeId.MyGame_Example2_Monster) {
+        if (test is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         testOffset = (test as MonsterT).pack(fbBuilder);
       }
     }
@@ -1449,24 +1461,42 @@ class MonsterT implements fb.Packable {
     var anyUniqueOffset = 0;
     if (anyUnique != null && anyUniqueType != null) {
       if (anyUniqueType == AnyUniqueAliasesTypeId.M) {
+        if (anyUnique is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         anyUniqueOffset = (anyUnique as MonsterT).pack(fbBuilder);
       }
  else if (anyUniqueType == AnyUniqueAliasesTypeId.TS) {
+        if (anyUnique is! TestSimpleTableWithEnumT) {
+          throw ArgumentError('Invalid union type');
+        }
         anyUniqueOffset = (anyUnique as TestSimpleTableWithEnumT).pack(fbBuilder);
       }
  else if (anyUniqueType == AnyUniqueAliasesTypeId.M2) {
+        if (anyUnique is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         anyUniqueOffset = (anyUnique as MonsterT).pack(fbBuilder);
       }
     }
     var anyAmbiguousOffset = 0;
     if (anyAmbiguous != null && anyAmbiguousType != null) {
       if (anyAmbiguousType == AnyAmbiguousAliasesTypeId.M1) {
+        if (anyAmbiguous is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         anyAmbiguousOffset = (anyAmbiguous as MonsterT).pack(fbBuilder);
       }
  else if (anyAmbiguousType == AnyAmbiguousAliasesTypeId.M2) {
+        if (anyAmbiguous is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         anyAmbiguousOffset = (anyAmbiguous as MonsterT).pack(fbBuilder);
       }
  else if (anyAmbiguousType == AnyAmbiguousAliasesTypeId.M3) {
+        if (anyAmbiguous is! MonsterT) {
+          throw ArgumentError('Invalid union type');
+        }
         anyAmbiguousOffset = (anyAmbiguous as MonsterT).pack(fbBuilder);
       }
     }
@@ -1943,7 +1973,10 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     this.negativeInfDefault,
     this.negativeInfinityDefault,
     this.doubleInfDefault,
-  });
+  })
+      : assert((test == null) || (testType != null && testType != AnyTypeId.NONE)),
+        assert((anyUnique == null) || (anyUniqueType != null && anyUniqueType != AnyUniqueAliasesTypeId.NONE)),
+        assert((anyAmbiguous == null) || (anyAmbiguousType != null && anyAmbiguousType != AnyAmbiguousAliasesTypeId.NONE));
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -1955,12 +1988,21 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     var testOffset = 0;
     if (_test != null && _testType != null) {
       if (_testType == AnyTypeId.Monster) {
+        if (_test is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         testOffset = (_test as MonsterObjectBuilder).finish(fbBuilder);
       }
  else if (_testType == AnyTypeId.TestSimpleTableWithEnum) {
+        if (_test is! TestSimpleTableWithEnumObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         testOffset = (_test as TestSimpleTableWithEnumObjectBuilder).finish(fbBuilder);
       }
  else if (_testType == AnyTypeId.MyGame_Example2_Monster) {
+        if (_test is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         testOffset = (_test as MonsterObjectBuilder).finish(fbBuilder);
       }
     }
@@ -2002,24 +2044,42 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     var anyUniqueOffset = 0;
     if (_anyUnique != null && _anyUniqueType != null) {
       if (_anyUniqueType == AnyUniqueAliasesTypeId.M) {
+        if (_anyUnique is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         anyUniqueOffset = (_anyUnique as MonsterObjectBuilder).finish(fbBuilder);
       }
  else if (_anyUniqueType == AnyUniqueAliasesTypeId.TS) {
+        if (_anyUnique is! TestSimpleTableWithEnumObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         anyUniqueOffset = (_anyUnique as TestSimpleTableWithEnumObjectBuilder).finish(fbBuilder);
       }
  else if (_anyUniqueType == AnyUniqueAliasesTypeId.M2) {
+        if (_anyUnique is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         anyUniqueOffset = (_anyUnique as MonsterObjectBuilder).finish(fbBuilder);
       }
     }
     var anyAmbiguousOffset = 0;
     if (_anyAmbiguous != null && _anyAmbiguousType != null) {
       if (_anyAmbiguousType == AnyAmbiguousAliasesTypeId.M1) {
+        if (_anyAmbiguous is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         anyAmbiguousOffset = (_anyAmbiguous as MonsterObjectBuilder).finish(fbBuilder);
       }
  else if (_anyAmbiguousType == AnyAmbiguousAliasesTypeId.M2) {
+        if (_anyAmbiguous is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         anyAmbiguousOffset = (_anyAmbiguous as MonsterObjectBuilder).finish(fbBuilder);
       }
  else if (_anyAmbiguousType == AnyAmbiguousAliasesTypeId.M3) {
+        if (_anyAmbiguous is! MonsterObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         anyAmbiguousOffset = (_anyAmbiguous as MonsterObjectBuilder).finish(fbBuilder);
       }
     }

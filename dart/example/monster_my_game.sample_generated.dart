@@ -160,17 +160,17 @@ class Vec3ObjectBuilder extends fb.ObjectBuilder {
   double z;
 
   Vec3ObjectBuilder({
-    this.x,
-    this.y,
-    this.z,
+    required this.x,
+    required this.y,
+    required this.z,
   });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    fbBuilder.putFloat32(_z);
-    fbBuilder.putFloat32(_y);
-    fbBuilder.putFloat32(_x);
+    fbBuilder.putFloat32(z);
+    fbBuilder.putFloat32(y);
+    fbBuilder.putFloat32(x);
     return fbBuilder.offset;
   }
 
@@ -268,6 +268,9 @@ class MonsterT implements fb.Packable {
     var equippedOffset = 0;
     if (equipped != null && equippedType != null) {
       if (equippedType == EquipmentTypeId.Weapon) {
+        if (equipped is! WeaponT) {
+          throw ArgumentError('Invalid union type');
+        }
         equippedOffset = (equipped as WeaponT).pack(fbBuilder);
       }
     }
@@ -369,7 +372,7 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
   List<int>? inventory;
   Color? color;
   List<WeaponObjectBuilder>? weapons;
-  Object?? equippedType;
+  EquipmentTypeId? equippedType;
   Object? equipped;
   List<Vec3ObjectBuilder>? path;
 
@@ -381,28 +384,32 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     this.inventory,
     this.color,
     this.weapons,
-    this.equipped,
     this.equippedType,
+    this.equipped,
     this.path,
-  });
+  })
+      : assert((equipped == null) || (equippedType != null && equippedType != EquipmentTypeId.NONE));
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? nameOffset = _name == null ? null
-        : fbBuilder.writeString(_name!);
-    final int? inventoryOffset = _inventory == null ? null
-        : fbBuilder.writeListUint8(_inventory!);
-    final int? weaponsOffset = _weapons == null ? null
-        : fbBuilder.writeList(_weapons!.map((b) => b.getOrCreateOffset(fbBuilder)).toList());
+    final int? nameOffset = name == null ? null
+        : fbBuilder.writeString(name!);
+    final int? inventoryOffset = inventory == null ? null
+        : fbBuilder.writeListUint8(inventory!);
+    final int? weaponsOffset = weapons == null ? null
+        : fbBuilder.writeList(weapons!.map((b) => b.finish(fbBuilder)).toList());
     var equippedOffset = 0;
-    if (_equipped != null && _equippedType != null) {
-      if (_equippedType == EquipmentTypeId.Weapon) {
-        equippedOffset = (_equipped as WeaponObjectBuilder).finish(fbBuilder);
+    if (equipped != null && equippedType != null) {
+      if (equippedType == EquipmentTypeId.Weapon) {
+        if (equipped is! WeaponObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
+        equippedOffset = (equipped as WeaponObjectBuilder).finish(fbBuilder);
       }
     }
-    final int? pathOffset = _path == null ? null
-        : fbBuilder.writeListOfStructs(_path!);
+    final int? pathOffset = path == null ? null
+        : fbBuilder.writeListOfStructs(path!);
     fbBuilder.startTable(11);
     if (pos != null) {
       fbBuilder.addStruct(0, pos!.finish(fbBuilder));
@@ -524,8 +531,8 @@ class WeaponObjectBuilder extends fb.ObjectBuilder {
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? nameOffset = _name == null ? null
-        : fbBuilder.writeString(_name!);
+    final int? nameOffset = name == null ? null
+        : fbBuilder.writeString(name!);
     fbBuilder.startTable(2);
     fbBuilder.addOffset(0, nameOffset);
     fbBuilder.addInt16(1, damage);

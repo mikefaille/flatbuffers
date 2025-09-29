@@ -272,6 +272,7 @@ class Table2 {
 
   Table2T unpack() => Table2T(
       typeType: typeType,
+      type: typeType: typeType,
       type: type);
 
   static int pack(fb.Builder fbBuilder, Table2T? object) {
@@ -293,9 +294,15 @@ class Table2T implements fb.Packable {
     var typeOffset = 0;
     if (type != null && typeType != null) {
       if (typeType == KeywordsInUnionTypeId.static) {
+        if (type is! KeywordsInTableT) {
+          throw ArgumentError('Invalid union type');
+        }
         typeOffset = (type as KeywordsInTableT).pack(fbBuilder);
       }
  else if (typeType == KeywordsInUnionTypeId.internal) {
+        if (type is! KeywordsInTableT) {
+          throw ArgumentError('Invalid union type');
+        }
         typeOffset = (type as KeywordsInTableT).pack(fbBuilder);
       }
     }
@@ -349,7 +356,8 @@ class Table2ObjectBuilder extends fb.ObjectBuilder {
   Table2ObjectBuilder({
     this.type,
     this.typeType,
-  });
+  })
+      : assert((type == null) || (typeType != null && typeType != KeywordsInUnionTypeId.NONE));
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -357,9 +365,15 @@ class Table2ObjectBuilder extends fb.ObjectBuilder {
     var typeOffset = 0;
     if (_type != null && _typeType != null) {
       if (_typeType == KeywordsInUnionTypeId.static) {
+        if (_type is! KeywordsInTableObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         typeOffset = (_type as KeywordsInTableObjectBuilder).finish(fbBuilder);
       }
  else if (_typeType == KeywordsInUnionTypeId.internal) {
+        if (_type is! KeywordsInTableObjectBuilder) {
+          throw ArgumentError('Invalid union type');
+        }
         typeOffset = (_type as KeywordsInTableObjectBuilder).finish(fbBuilder);
       }
     }

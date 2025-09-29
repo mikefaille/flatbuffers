@@ -624,6 +624,10 @@ class DartGenerator : public BaseGenerator {
                   ? "Nullable(_bc, _bcOffset, " + offset + ")"
                   : "(_bc, _bcOffset, " + offset + ", " + defaultValue + ")";
         }
+      } else if (type.base_type == BASE_TYPE_UNION) {
+        constructor_args +=
+            field_name + "Type: " + field_name + "Type,\n      " + field_name +
+            ": " + field_name;
       } else {
         constructor_args += field_name;
       }
@@ -974,7 +978,27 @@ class DartGenerator : public BaseGenerator {
         code += "    this." + namer_.Variable(field) + "Type,\n";
       }
     }
-    code += "  });\n\n";
+    code += "  })";
+
+    std::string asserts;
+    for (auto it = non_deprecated_fields.begin();
+         it != non_deprecated_fields.end(); ++it) {
+      const FieldDef& field = *it->second;
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        const auto field_name = namer_.Variable(field);
+        const auto type_name =
+            namer_.Type(*field.value.type.enum_def) + "TypeId";
+        if (!asserts.empty()) asserts += ",\n        ";
+        asserts += "assert((" + field_name + " == null) || (" + field_name +
+                   "Type != null && " + field_name + "Type != " + type_name +
+                   ".NONE))";
+      }
+    }
+
+    if (!asserts.empty()) {
+      code += "\n      : " + asserts;
+    }
+    code += ";\n\n";
 
     code += "  /// Finish building, and store into the [fbBuilder].\n";
     code += "  @override\n";
@@ -1029,6 +1053,9 @@ class DartGenerator : public BaseGenerator {
             std::string type_name =
                 pack ? namer_.ObjectType(sdef)
                      : namer_.Type(sdef) + "ObjectBuilder";
+            code += "        if (" + fvar + " is! " + type_name + ") {\n";
+            code += "          throw ArgumentError('Invalid union type');\n";
+            code += "        }\n";
             code += "        " + offv + " = (" + fvar + " as " + type_name +
                     ")." + (pack ? "pack" : "finish") + "(fbBuilder);\n";
           } else if (uval.union_type.base_type == BASE_TYPE_STRING) {
