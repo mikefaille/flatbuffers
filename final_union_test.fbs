@@ -1,0 +1,20 @@
+namespace final_test;
+
+table TestTable {
+  some_data: string;
+}
+
+table StringValue {
+  value: string;
+}
+
+union TestUnion {
+  TestTable,
+  StringValue
+}
+
+table RootTable {
+  test_union: TestUnion;
+}
+
+root_type RootTable;

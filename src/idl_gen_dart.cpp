@@ -400,7 +400,7 @@ class DartGenerator : public BaseGenerator {
       if (type.enum_def->is_union && type.base_type != BASE_TYPE_UNION) {
         return namer_.Type(*type.enum_def) + "TypeId";
       } else if (type.enum_def->is_union) {
-        return "dynamic";
+        return "Object";
       } else if (type.base_type != BASE_TYPE_VECTOR) {
         return namer_.Type(*type.enum_def);
       }
@@ -443,7 +443,8 @@ class DartGenerator : public BaseGenerator {
                               std::string struct_type_suffix) {
     std::string typeName =
         GenDartTypeName(type, current_namespace, def, struct_type_suffix);
-    if (nullable && typeName != "dynamic") typeName += "?";
+    if (nullable && typeName != "dynamic" && typeName != "Object")
+      typeName += "?";
     return typeName;
   }
 
@@ -1162,11 +1163,7 @@ class DartGenerator : public BaseGenerator {
           (prependUnderscore ? "" : "_") + namer_.Variable(field);
       if (field.value.type.base_type == BASE_TYPE_UTYPE) {
         std::string union_name = field.name;
-        const auto suffix = "_type";
-        if (union_name.size() > strlen(suffix) &&
-            union_name.rfind(suffix) == union_name.size() - strlen(suffix)) {
-          union_name.resize(union_name.size() - strlen(suffix));
-        }
+        union_name.resize(union_name.size() - strlen("_type"));
         const FieldDef* union_field = struct_def.fields.Lookup(union_name);
         if (union_field) {
           code += "    fbBuilder.addUint8(" + NumToString(offset) + ", " +
