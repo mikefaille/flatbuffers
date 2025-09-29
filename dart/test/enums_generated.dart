@@ -2,8 +2,8 @@
 // ignore_for_file: unused_import, unused_field, unused_element, unused_local_variable, constant_identifier_names
 
 import 'dart:typed_data' show Uint8List;
-
 import 'package:flat_buffers/flat_buffers.dart' as fb;
+
 
 enum OptionsEnum {
   A(1),
@@ -15,14 +15,10 @@ enum OptionsEnum {
 
   factory OptionsEnum.fromValue(int value) {
     switch (value) {
-      case 1:
-        return OptionsEnum.A;
-      case 2:
-        return OptionsEnum.B;
-      case 3:
-        return OptionsEnum.C;
-      default:
-        throw StateError('Invalid value $value for bit flag enum');
+      case 1: return OptionsEnum.A;
+      case 2: return OptionsEnum.B;
+      case 3: return OptionsEnum.C;
+      default: throw StateError('Invalid value $value for bit flag enum');
     }
   }
 
@@ -57,9 +53,7 @@ class MyTable {
   final fb.BufferContext _bc;
   final int _bcOffset;
 
-  List<OptionsEnum>? get options => const fb.ListReader<OptionsEnum>(
-    OptionsEnum.reader,
-  ).vTableGetNullable(_bc, _bcOffset, 4);
+  List<OptionsEnum>? get options => const fb.ListReader<OptionsEnum>(OptionsEnum.reader).vTableGetNullable(_bc, _bcOffset, 4);
 
   @override
   String toString() {
@@ -67,11 +61,7 @@ class MyTable {
   }
 
   MyTableT unpack() => MyTableT(
-    options: const fb.ListReader<OptionsEnum>(
-      OptionsEnum.reader,
-      lazy: false,
-    ).vTableGetNullable(_bc, _bcOffset, 4),
-  );
+      options: const fb.ListReader<OptionsEnum>(OptionsEnum.reader, lazy: false).vTableGetNullable(_bc, _bcOffset, 4));
 
   static int pack(fb.Builder fbBuilder, MyTableT? object) {
     if (object == null) return 0;
@@ -80,14 +70,14 @@ class MyTable {
 }
 
 class MyTableT implements fb.Packable {
-  List<OptionsEnum>? options;
+  final List<OptionsEnum>? options;
 
-  MyTableT({this.options});
+  const MyTableT({
+      this.options});
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? optionsOffset = options == null
-        ? null
+    final int? optionsOffset = options == null ? null
         : fbBuilder.writeListUint32(options!.map((f) => f.value).toList());
     fbBuilder.startTable(1);
     fbBuilder.addOffset(0, optionsOffset);
@@ -105,7 +95,7 @@ class _MyTableReader extends fb.TableReader<MyTable> {
 
   @override
   MyTable createObject(fb.BufferContext bc, int offset) =>
-      MyTable._(bc, offset);
+    MyTable._(bc, offset);
 }
 
 class MyTableBuilder {
@@ -128,16 +118,17 @@ class MyTableBuilder {
 }
 
 class MyTableObjectBuilder extends fb.ObjectBuilder {
-  final List<OptionsEnum>? _options;
+  final List<OptionsEnum>? options;
 
-  MyTableObjectBuilder({List<OptionsEnum>? options}) : _options = options;
+  const MyTableObjectBuilder({
+    this.options,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? optionsOffset = _options == null
-        ? null
-        : fbBuilder.writeListUint32(_options!.map((f) => f.value).toList());
+    final int? optionsOffset = options == null ? null
+        : fbBuilder.writeListUint32(options!.map((f) => f.value).toList());
     fbBuilder.startTable(1);
     fbBuilder.addOffset(0, optionsOffset);
     return fbBuilder.endTable();

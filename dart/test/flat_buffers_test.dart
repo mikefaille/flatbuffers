@@ -934,6 +934,39 @@ class ObjectAPITest {
     final object3Read = example.TypeAliases(fbb.buffer).unpack();
     expect(object3.toString(), object3Read.toString());
   }
+
+  void test_union() {
+    final fbBuilder = Builder();
+
+    // 1. NONE/null case
+    final monster1 = example.MonsterT(
+      testType: example.AnyTypeId.NONE,
+      test: null,
+    );
+    fbBuilder.finish(monster1.pack(fbBuilder));
+    final monster1Read = example.Monster(fbBuilder.buffer).unpack();
+    expect(monster1.toString(), monster1Read.toString());
+    fbBuilder.reset();
+
+    // 2. Table case
+    final monster2 = example.MonsterT(
+      testType: example.AnyTypeId.TestSimpleTableWithEnum,
+      test: example.TestSimpleTableWithEnumT(color: example.Color.Green),
+    );
+    fbBuilder.finish(monster2.pack(fbBuilder));
+    final monster2Read = example.Monster(fbBuilder.buffer).unpack();
+    expect(monster2.toString(), monster2Read.toString());
+    fbBuilder.reset();
+
+    // 3. Cross-namespace table case
+    final monster3 = example.MonsterT(
+      testType: example.AnyTypeId.MyGame_Example2_Monster,
+      test: example2.MonsterT(),
+    );
+    fbBuilder.finish(monster3.pack(fbBuilder));
+    final monster3Read = example.Monster(fbBuilder.buffer).unpack();
+    expect(monster3.toString(), monster3Read.toString());
+  }
 }
 
 class StringListWrapperImpl {
