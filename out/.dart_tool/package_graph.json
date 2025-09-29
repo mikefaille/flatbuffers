@@ -1,0 +1,21 @@
+{
+  "roots": [
+    "smoke_test"
+  ],
+  "packages": [
+    {
+      "name": "smoke_test",
+      "version": "0.0.0",
+      "dependencies": [
+        "flat_buffers"
+      ],
+      "devDependencies": []
+    },
+    {
+      "name": "flat_buffers",
+      "version": "2.0.5",
+      "dependencies": []
+    }
+  ],
+  "configVersion": 1
+}
