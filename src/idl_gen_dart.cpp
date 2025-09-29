@@ -780,7 +780,7 @@ class DartGenerator : public BaseGenerator {
         code += ", ";
       }
     }
-    code += "}';\n";
+    code += "}';
     code += "  }\n";
     return code;
   }
@@ -996,6 +996,7 @@ class DartGenerator : public BaseGenerator {
     code += "  }\n";
     code += "}\n";
   }
+
   std::string GenObjectBuilderImplementation(
       const StructDef& struct_def,
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields,
@@ -1006,7 +1007,7 @@ class DartGenerator : public BaseGenerator {
       const FieldDef& field = *it->second;
       if (field.value.type.base_type == BASE_TYPE_UNION) {
         const auto fname = namer_.Variable(field);
-        const auto fvar = (prependUnderscore ? "" : "_") + fname;
+        const auto fvar = fname;
         const auto tvar = fvar + "Type";
         const auto offv = fname + std::string("Offset");
         const auto& uenum = *field.value.type.enum_def;
@@ -1047,8 +1048,7 @@ class DartGenerator : public BaseGenerator {
         continue;
 
       std::string offset_name = namer_.Variable(field) + "Offset";
-      std::string field_name =
-          (prependUnderscore ? "" : "_") + namer_.Variable(field);
+      std::string field_name = namer_.Variable(field);
       // custom handling for fixed-sized struct in pack()
       if (pack && IsVector(field.value.type) &&
           field.value.type.VectorType().base_type == BASE_TYPE_STRUCT &&
@@ -1124,16 +1124,9 @@ class DartGenerator : public BaseGenerator {
       }
 
       if (IsStruct(field.value.type)) {
-        code += "    ";
-        if (prependUnderscore) {
-          code += "_";
-        }
-        code += field_name + (pack ? ".pack" : ".finish") + "(fbBuilder);\n";
+        code += "    " + field_name + (pack ? ".pack" : ".finish") + "(fbBuilder);\n";
       } else {
         code += "    fbBuilder.put" + GenType(field.value.type) + "(";
-        if (prependUnderscore) {
-          code += "_";
-        }
         code += field_name;
         if (field.value.type.enum_def) {
           code += ".value";
@@ -1159,9 +1152,9 @@ class DartGenerator : public BaseGenerator {
       const FieldDef& field = *it->second;
       auto offset = it->first;
 
-      std::string field_var =
-          (prependUnderscore ? "" : "_") + namer_.Variable(field);
+      std::string field_var = namer_.Variable(field);
       if (field.value.type.base_type == BASE_TYPE_UTYPE) {
+        // Fix: For UTYPE fields, directly reference the corresponding union type discriminator
         std::string union_name = field.name;
         union_name.resize(union_name.size() - strlen("_type"));
         const FieldDef* union_field = struct_def.fields.Lookup(union_name);
