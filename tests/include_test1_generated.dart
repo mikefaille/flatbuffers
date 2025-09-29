@@ -83,12 +83,11 @@ class TableABuilder {
 }
 
 class TableAObjectBuilder extends fb.ObjectBuilder {
-  final my_game_other_name_space.TableBObjectBuilder? _b;
+  my_game_other_name_space.TableBObjectBuilder? b;
 
   TableAObjectBuilder({
-    my_game_other_name_space.TableBObjectBuilder? b,
-  })
-      : _b = b;
+    this.b,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override

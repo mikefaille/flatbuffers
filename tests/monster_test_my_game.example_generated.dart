@@ -310,15 +310,13 @@ class TestBuilder {
 }
 
 class TestObjectBuilder extends fb.ObjectBuilder {
-  final int _a;
-  final int _b;
+  int a;
+  int b;
 
   TestObjectBuilder({
-    required int a,
-    required int b,
-  })
-      : _a = a,
-        _b = b;
+    this.a,
+    this.b,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -412,18 +410,17 @@ class TestSimpleTableWithEnumBuilder {
 }
 
 class TestSimpleTableWithEnumObjectBuilder extends fb.ObjectBuilder {
-  final Color? _color;
+  Color? color;
 
   TestSimpleTableWithEnumObjectBuilder({
-    Color? color,
-  })
-      : _color = color;
+    this.color,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
     fbBuilder.startTable(1);
-    fbBuilder.addUint8(0, _color?.value);
+    fbBuilder.addUint8(0, color?.value);
     return fbBuilder.endTable();
   }
 
@@ -537,27 +534,21 @@ class Vec3Builder {
 }
 
 class Vec3ObjectBuilder extends fb.ObjectBuilder {
-  final double _x;
-  final double _y;
-  final double _z;
-  final double _test1;
-  final Color _test2;
-  final TestObjectBuilder _test3;
+  double x;
+  double y;
+  double z;
+  double test1;
+  Color test2;
+  TestObjectBuilder test3;
 
   Vec3ObjectBuilder({
-    required double x,
-    required double y,
-    required double z,
-    required double test1,
-    required Color test2,
-    required TestObjectBuilder test3,
-  })
-      : _x = x,
-        _y = y,
-        _z = z,
-        _test1 = test1,
-        _test2 = test2,
-        _test3 = test3;
+    this.x,
+    this.y,
+    this.z,
+    this.test1,
+    this.test2,
+    this.test3,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -654,15 +645,13 @@ class AbilityBuilder {
 }
 
 class AbilityObjectBuilder extends fb.ObjectBuilder {
-  final int _id;
-  final int _distance;
+  int id;
+  int distance;
 
   AbilityObjectBuilder({
-    required int id,
-    required int distance,
-  })
-      : _id = id,
-        _distance = distance;
+    this.id,
+    this.distance,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -758,18 +747,15 @@ class StructOfStructsBuilder {
 }
 
 class StructOfStructsObjectBuilder extends fb.ObjectBuilder {
-  final AbilityObjectBuilder _a;
-  final TestObjectBuilder _b;
-  final AbilityObjectBuilder _c;
+  AbilityObjectBuilder a;
+  TestObjectBuilder b;
+  AbilityObjectBuilder c;
 
   StructOfStructsObjectBuilder({
-    required AbilityObjectBuilder a,
-    required TestObjectBuilder b,
-    required AbilityObjectBuilder c,
-  })
-      : _a = a,
-        _b = b,
-        _c = c;
+    this.a,
+    this.b,
+    this.c,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -854,12 +840,11 @@ class StructOfStructsOfStructsBuilder {
 }
 
 class StructOfStructsOfStructsObjectBuilder extends fb.ObjectBuilder {
-  final StructOfStructsObjectBuilder _a;
+  StructOfStructsObjectBuilder a;
 
   StructOfStructsOfStructsObjectBuilder({
-    required StructOfStructsObjectBuilder a,
-  })
-      : _a = a;
+    this.a,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -971,18 +956,15 @@ class StatBuilder {
 }
 
 class StatObjectBuilder extends fb.ObjectBuilder {
-  final String? _id;
-  final int? _val;
-  final int? _count;
+  String? id;
+  int? val;
+  int? count;
 
   StatObjectBuilder({
-    String? id,
-    int? val,
-    int? count,
-  })
-      : _id = id,
-        _val = val,
-        _count = count;
+    this.id,
+    this.val,
+    this.count,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -991,8 +973,8 @@ class StatObjectBuilder extends fb.ObjectBuilder {
         : fbBuilder.writeString(_id!);
     fbBuilder.startTable(3);
     fbBuilder.addOffset(0, idOffset);
-    fbBuilder.addInt64(1, _val);
-    fbBuilder.addUint16(2, _count);
+    fbBuilder.addInt64(1, val);
+    fbBuilder.addUint16(2, count);
     return fbBuilder.endTable();
   }
 
@@ -1079,18 +1061,17 @@ class ReferrableBuilder {
 }
 
 class ReferrableObjectBuilder extends fb.ObjectBuilder {
-  final int? _id;
+  int? id;
 
   ReferrableObjectBuilder({
-    int? id,
-  })
-      : _id = id;
+    this.id,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
     fbBuilder.startTable(1);
-    fbBuilder.addUint64(0, _id);
+    fbBuilder.addUint64(0, id);
     return fbBuilder.endTable();
   }
 
@@ -1122,7 +1103,7 @@ class Monster {
   List<int>? get inventory => const fb.Uint8ListReader().vTableGetNullable(_bc, _bcOffset, 14);
   Color get color => Color.fromValue(const fb.Uint8Reader().vTableGet(_bc, _bcOffset, 16, 8));
   AnyTypeId? get testType => AnyTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 18));
-  dynamic get test {
+  Object? get test {
     switch (testType?.value) {
       case 1: return Monster.reader.vTableGetNullable(_bc, _bcOffset, 20);
       case 2: return TestSimpleTableWithEnum.reader.vTableGetNullable(_bc, _bcOffset, 20);
@@ -1167,7 +1148,7 @@ class Monster {
   int get nonOwningReference => const fb.Uint64Reader().vTableGet(_bc, _bcOffset, 86, 0);
   List<int>? get vectorOfNonOwningReferences => const fb.ListReader<int>(fb.Uint64Reader()).vTableGetNullable(_bc, _bcOffset, 88);
   AnyUniqueAliasesTypeId? get anyUniqueType => AnyUniqueAliasesTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 90));
-  dynamic get anyUnique {
+  Object? get anyUnique {
     switch (anyUniqueType?.value) {
       case 1: return Monster.reader.vTableGetNullable(_bc, _bcOffset, 92);
       case 2: return TestSimpleTableWithEnum.reader.vTableGetNullable(_bc, _bcOffset, 92);
@@ -1176,7 +1157,7 @@ class Monster {
     }
   }
   AnyAmbiguousAliasesTypeId? get anyAmbiguousType => AnyAmbiguousAliasesTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 94));
-  dynamic get anyAmbiguous {
+  Object? get anyAmbiguous {
     switch (anyAmbiguousType?.value) {
       case 1: return Monster.reader.vTableGetNullable(_bc, _bcOffset, 96);
       case 2: return Monster.reader.vTableGetNullable(_bc, _bcOffset, 96);
@@ -1283,7 +1264,7 @@ class MonsterT implements fb.Packable {
   List<int>? inventory;
   Color color;
   AnyTypeId? testType;
-  dynamic test;
+  Object? test;
   List<TestT>? test4;
   List<String>? testarrayofstring;
   ///  an example documentation comment: this will end up in the generated code
@@ -1321,9 +1302,9 @@ class MonsterT implements fb.Packable {
   int nonOwningReference;
   List<int>? vectorOfNonOwningReferences;
   AnyUniqueAliasesTypeId? anyUniqueType;
-  dynamic anyUnique;
+  Object? anyUnique;
   AnyAmbiguousAliasesTypeId? anyAmbiguousType;
-  dynamic anyAmbiguous;
+  Object? anyAmbiguous;
   List<Color>? vectorOfEnums;
   Race signedEnum;
   List<int>? testrequirednestedflatbuffer;
@@ -1409,7 +1390,18 @@ class MonsterT implements fb.Packable {
         : fbBuilder.writeString(name!);
     final int? inventoryOffset = inventory == null ? null
         : fbBuilder.writeListUint8(inventory!);
-    final int? testOffset = test?.pack(fbBuilder);
+    var testOffset = 0;
+    if (test != null && testType != null) {
+      if (testType == AnyTypeId.Monster) {
+        testOffset = (test as MonsterT).pack(fbBuilder);
+      }
+ else if (testType == AnyTypeId.TestSimpleTableWithEnum) {
+        testOffset = (test as TestSimpleTableWithEnumT).pack(fbBuilder);
+      }
+ else if (testType == AnyTypeId.MyGame_Example2_Monster) {
+        testOffset = (test as MonsterT).pack(fbBuilder);
+      }
+    }
     int? test4Offset;
     if (test4 != null) {
       for (var e in test4!) { e.pack(fbBuilder); }
@@ -1454,8 +1446,30 @@ class MonsterT implements fb.Packable {
         : fbBuilder.writeListUint64(vectorOfCoOwningReferences!);
     final int? vectorOfNonOwningReferencesOffset = vectorOfNonOwningReferences == null ? null
         : fbBuilder.writeListUint64(vectorOfNonOwningReferences!);
-    final int? anyUniqueOffset = anyUnique?.pack(fbBuilder);
-    final int? anyAmbiguousOffset = anyAmbiguous?.pack(fbBuilder);
+    var anyUniqueOffset = 0;
+    if (anyUnique != null && anyUniqueType != null) {
+      if (anyUniqueType == AnyUniqueAliasesTypeId.M) {
+        anyUniqueOffset = (anyUnique as MonsterT).pack(fbBuilder);
+      }
+ else if (anyUniqueType == AnyUniqueAliasesTypeId.TS) {
+        anyUniqueOffset = (anyUnique as TestSimpleTableWithEnumT).pack(fbBuilder);
+      }
+ else if (anyUniqueType == AnyUniqueAliasesTypeId.M2) {
+        anyUniqueOffset = (anyUnique as MonsterT).pack(fbBuilder);
+      }
+    }
+    var anyAmbiguousOffset = 0;
+    if (anyAmbiguous != null && anyAmbiguousType != null) {
+      if (anyAmbiguousType == AnyAmbiguousAliasesTypeId.M1) {
+        anyAmbiguousOffset = (anyAmbiguous as MonsterT).pack(fbBuilder);
+      }
+ else if (anyAmbiguousType == AnyAmbiguousAliasesTypeId.M2) {
+        anyAmbiguousOffset = (anyAmbiguous as MonsterT).pack(fbBuilder);
+      }
+ else if (anyAmbiguousType == AnyAmbiguousAliasesTypeId.M3) {
+        anyAmbiguousOffset = (anyAmbiguous as MonsterT).pack(fbBuilder);
+      }
+    }
     final int? vectorOfEnumsOffset = vectorOfEnums == null ? null
         : fbBuilder.writeListUint8(vectorOfEnums!.map((f) => f.value).toList());
     final int? testrequirednestedflatbufferOffset = testrequirednestedflatbuffer == null ? null
@@ -1471,7 +1485,7 @@ class MonsterT implements fb.Packable {
     fbBuilder.addOffset(3, nameOffset);
     fbBuilder.addOffset(5, inventoryOffset);
     fbBuilder.addUint8(6, color.value);
-    fbBuilder.addUint8(7, testType?.value);
+    fbBuilder.addUint8(7, testType?.value ?? 0);
     fbBuilder.addOffset(8, testOffset);
     fbBuilder.addOffset(9, test4Offset);
     fbBuilder.addOffset(10, testarrayofstringOffset);
@@ -1507,9 +1521,9 @@ class MonsterT implements fb.Packable {
     fbBuilder.addOffset(40, vectorOfCoOwningReferencesOffset);
     fbBuilder.addUint64(41, nonOwningReference);
     fbBuilder.addOffset(42, vectorOfNonOwningReferencesOffset);
-    fbBuilder.addUint8(43, anyUniqueType?.value);
+    fbBuilder.addUint8(43, anyUniqueType?.value ?? 0);
     fbBuilder.addOffset(44, anyUniqueOffset);
-    fbBuilder.addUint8(45, anyAmbiguousType?.value);
+    fbBuilder.addUint8(45, anyAmbiguousType?.value ?? 0);
     fbBuilder.addOffset(46, anyAmbiguousOffset);
     fbBuilder.addOffset(47, vectorOfEnumsOffset);
     fbBuilder.addInt8(48, signedEnum.value);
@@ -1805,192 +1819,131 @@ class MonsterBuilder {
 }
 
 class MonsterObjectBuilder extends fb.ObjectBuilder {
-  final Vec3ObjectBuilder? _pos;
-  final int? _mana;
-  final int? _hp;
-  final String? _name;
-  final List<int>? _inventory;
-  final Color? _color;
-  final AnyTypeId? _testType;
-  final dynamic _test;
-  final List<TestObjectBuilder>? _test4;
-  final List<String>? _testarrayofstring;
-  final List<MonsterObjectBuilder>? _testarrayoftables;
-  final MonsterObjectBuilder? _enemy;
-  final List<int>? _testnestedflatbuffer;
-  final StatObjectBuilder? _testempty;
-  final bool? _testbool;
-  final int? _testhashs32Fnv1;
-  final int? _testhashu32Fnv1;
-  final int? _testhashs64Fnv1;
-  final int? _testhashu64Fnv1;
-  final int? _testhashs32Fnv1a;
-  final int? _testhashu32Fnv1a;
-  final int? _testhashs64Fnv1a;
-  final int? _testhashu64Fnv1a;
-  final List<bool>? _testarrayofbools;
-  final double? _testf;
-  final double? _testf2;
-  final double? _testf3;
-  final List<String>? _testarrayofstring2;
-  final List<AbilityObjectBuilder>? _testarrayofsortedstruct;
-  final List<int>? _flex;
-  final List<TestObjectBuilder>? _test5;
-  final List<int>? _vectorOfLongs;
-  final List<double>? _vectorOfDoubles;
-  final my_game.InParentNamespaceObjectBuilder? _parentNamespaceTest;
-  final List<ReferrableObjectBuilder>? _vectorOfReferrables;
-  final int? _singleWeakReference;
-  final List<int>? _vectorOfWeakReferences;
-  final List<ReferrableObjectBuilder>? _vectorOfStrongReferrables;
-  final int? _coOwningReference;
-  final List<int>? _vectorOfCoOwningReferences;
-  final int? _nonOwningReference;
-  final List<int>? _vectorOfNonOwningReferences;
-  final AnyUniqueAliasesTypeId? _anyUniqueType;
-  final dynamic _anyUnique;
-  final AnyAmbiguousAliasesTypeId? _anyAmbiguousType;
-  final dynamic _anyAmbiguous;
-  final List<Color>? _vectorOfEnums;
-  final Race? _signedEnum;
-  final List<int>? _testrequirednestedflatbuffer;
-  final List<StatObjectBuilder>? _scalarKeySortedTables;
-  final TestObjectBuilder? _nativeInline;
-  final LongEnum? _longEnumNonEnumDefault;
-  final LongEnum? _longEnumNormalDefault;
-  final double? _nanDefault;
-  final double? _infDefault;
-  final double? _positiveInfDefault;
-  final double? _infinityDefault;
-  final double? _positiveInfinityDefault;
-  final double? _negativeInfDefault;
-  final double? _negativeInfinityDefault;
-  final double? _doubleInfDefault;
+  Vec3ObjectBuilder? pos;
+  int? mana;
+  int? hp;
+  String? name;
+  List<int>? inventory;
+  Color? color;
+  Object?? testType;
+  Object? test;
+  List<TestObjectBuilder>? test4;
+  List<String>? testarrayofstring;
+  List<MonsterObjectBuilder>? testarrayoftables;
+  MonsterObjectBuilder? enemy;
+  List<int>? testnestedflatbuffer;
+  StatObjectBuilder? testempty;
+  bool? testbool;
+  int? testhashs32Fnv1;
+  int? testhashu32Fnv1;
+  int? testhashs64Fnv1;
+  int? testhashu64Fnv1;
+  int? testhashs32Fnv1a;
+  int? testhashu32Fnv1a;
+  int? testhashs64Fnv1a;
+  int? testhashu64Fnv1a;
+  List<bool>? testarrayofbools;
+  double? testf;
+  double? testf2;
+  double? testf3;
+  List<String>? testarrayofstring2;
+  List<AbilityObjectBuilder>? testarrayofsortedstruct;
+  List<int>? flex;
+  List<TestObjectBuilder>? test5;
+  List<int>? vectorOfLongs;
+  List<double>? vectorOfDoubles;
+  my_game.InParentNamespaceObjectBuilder? parentNamespaceTest;
+  List<ReferrableObjectBuilder>? vectorOfReferrables;
+  int? singleWeakReference;
+  List<int>? vectorOfWeakReferences;
+  List<ReferrableObjectBuilder>? vectorOfStrongReferrables;
+  int? coOwningReference;
+  List<int>? vectorOfCoOwningReferences;
+  int? nonOwningReference;
+  List<int>? vectorOfNonOwningReferences;
+  Object?? anyUniqueType;
+  Object? anyUnique;
+  Object?? anyAmbiguousType;
+  Object? anyAmbiguous;
+  List<Color>? vectorOfEnums;
+  Race? signedEnum;
+  List<int>? testrequirednestedflatbuffer;
+  List<StatObjectBuilder>? scalarKeySortedTables;
+  TestObjectBuilder? nativeInline;
+  LongEnum? longEnumNonEnumDefault;
+  LongEnum? longEnumNormalDefault;
+  double? nanDefault;
+  double? infDefault;
+  double? positiveInfDefault;
+  double? infinityDefault;
+  double? positiveInfinityDefault;
+  double? negativeInfDefault;
+  double? negativeInfinityDefault;
+  double? doubleInfDefault;
 
   MonsterObjectBuilder({
-    Vec3ObjectBuilder? pos,
-    int? mana,
-    int? hp,
-    String? name,
-    List<int>? inventory,
-    Color? color,
-    AnyTypeId? testType,
-    dynamic test,
-    List<TestObjectBuilder>? test4,
-    List<String>? testarrayofstring,
-    List<MonsterObjectBuilder>? testarrayoftables,
-    MonsterObjectBuilder? enemy,
-    List<int>? testnestedflatbuffer,
-    StatObjectBuilder? testempty,
-    bool? testbool,
-    int? testhashs32Fnv1,
-    int? testhashu32Fnv1,
-    int? testhashs64Fnv1,
-    int? testhashu64Fnv1,
-    int? testhashs32Fnv1a,
-    int? testhashu32Fnv1a,
-    int? testhashs64Fnv1a,
-    int? testhashu64Fnv1a,
-    List<bool>? testarrayofbools,
-    double? testf,
-    double? testf2,
-    double? testf3,
-    List<String>? testarrayofstring2,
-    List<AbilityObjectBuilder>? testarrayofsortedstruct,
-    List<int>? flex,
-    List<TestObjectBuilder>? test5,
-    List<int>? vectorOfLongs,
-    List<double>? vectorOfDoubles,
-    my_game.InParentNamespaceObjectBuilder? parentNamespaceTest,
-    List<ReferrableObjectBuilder>? vectorOfReferrables,
-    int? singleWeakReference,
-    List<int>? vectorOfWeakReferences,
-    List<ReferrableObjectBuilder>? vectorOfStrongReferrables,
-    int? coOwningReference,
-    List<int>? vectorOfCoOwningReferences,
-    int? nonOwningReference,
-    List<int>? vectorOfNonOwningReferences,
-    AnyUniqueAliasesTypeId? anyUniqueType,
-    dynamic anyUnique,
-    AnyAmbiguousAliasesTypeId? anyAmbiguousType,
-    dynamic anyAmbiguous,
-    List<Color>? vectorOfEnums,
-    Race? signedEnum,
-    List<int>? testrequirednestedflatbuffer,
-    List<StatObjectBuilder>? scalarKeySortedTables,
-    TestObjectBuilder? nativeInline,
-    LongEnum? longEnumNonEnumDefault,
-    LongEnum? longEnumNormalDefault,
-    double? nanDefault,
-    double? infDefault,
-    double? positiveInfDefault,
-    double? infinityDefault,
-    double? positiveInfinityDefault,
-    double? negativeInfDefault,
-    double? negativeInfinityDefault,
-    double? doubleInfDefault,
-  })
-      : _pos = pos,
-        _mana = mana,
-        _hp = hp,
-        _name = name,
-        _inventory = inventory,
-        _color = color,
-        _testType = testType,
-        _test = test,
-        _test4 = test4,
-        _testarrayofstring = testarrayofstring,
-        _testarrayoftables = testarrayoftables,
-        _enemy = enemy,
-        _testnestedflatbuffer = testnestedflatbuffer,
-        _testempty = testempty,
-        _testbool = testbool,
-        _testhashs32Fnv1 = testhashs32Fnv1,
-        _testhashu32Fnv1 = testhashu32Fnv1,
-        _testhashs64Fnv1 = testhashs64Fnv1,
-        _testhashu64Fnv1 = testhashu64Fnv1,
-        _testhashs32Fnv1a = testhashs32Fnv1a,
-        _testhashu32Fnv1a = testhashu32Fnv1a,
-        _testhashs64Fnv1a = testhashs64Fnv1a,
-        _testhashu64Fnv1a = testhashu64Fnv1a,
-        _testarrayofbools = testarrayofbools,
-        _testf = testf,
-        _testf2 = testf2,
-        _testf3 = testf3,
-        _testarrayofstring2 = testarrayofstring2,
-        _testarrayofsortedstruct = testarrayofsortedstruct,
-        _flex = flex,
-        _test5 = test5,
-        _vectorOfLongs = vectorOfLongs,
-        _vectorOfDoubles = vectorOfDoubles,
-        _parentNamespaceTest = parentNamespaceTest,
-        _vectorOfReferrables = vectorOfReferrables,
-        _singleWeakReference = singleWeakReference,
-        _vectorOfWeakReferences = vectorOfWeakReferences,
-        _vectorOfStrongReferrables = vectorOfStrongReferrables,
-        _coOwningReference = coOwningReference,
-        _vectorOfCoOwningReferences = vectorOfCoOwningReferences,
-        _nonOwningReference = nonOwningReference,
-        _vectorOfNonOwningReferences = vectorOfNonOwningReferences,
-        _anyUniqueType = anyUniqueType,
-        _anyUnique = anyUnique,
-        _anyAmbiguousType = anyAmbiguousType,
-        _anyAmbiguous = anyAmbiguous,
-        _vectorOfEnums = vectorOfEnums,
-        _signedEnum = signedEnum,
-        _testrequirednestedflatbuffer = testrequirednestedflatbuffer,
-        _scalarKeySortedTables = scalarKeySortedTables,
-        _nativeInline = nativeInline,
-        _longEnumNonEnumDefault = longEnumNonEnumDefault,
-        _longEnumNormalDefault = longEnumNormalDefault,
-        _nanDefault = nanDefault,
-        _infDefault = infDefault,
-        _positiveInfDefault = positiveInfDefault,
-        _infinityDefault = infinityDefault,
-        _positiveInfinityDefault = positiveInfinityDefault,
-        _negativeInfDefault = negativeInfDefault,
-        _negativeInfinityDefault = negativeInfinityDefault,
-        _doubleInfDefault = doubleInfDefault;
+    this.pos,
+    this.mana,
+    this.hp,
+    this.name,
+    this.inventory,
+    this.color,
+    this.test,
+    this.testType,
+    this.test4,
+    this.testarrayofstring,
+    this.testarrayoftables,
+    this.enemy,
+    this.testnestedflatbuffer,
+    this.testempty,
+    this.testbool,
+    this.testhashs32Fnv1,
+    this.testhashu32Fnv1,
+    this.testhashs64Fnv1,
+    this.testhashu64Fnv1,
+    this.testhashs32Fnv1a,
+    this.testhashu32Fnv1a,
+    this.testhashs64Fnv1a,
+    this.testhashu64Fnv1a,
+    this.testarrayofbools,
+    this.testf,
+    this.testf2,
+    this.testf3,
+    this.testarrayofstring2,
+    this.testarrayofsortedstruct,
+    this.flex,
+    this.test5,
+    this.vectorOfLongs,
+    this.vectorOfDoubles,
+    this.parentNamespaceTest,
+    this.vectorOfReferrables,
+    this.singleWeakReference,
+    this.vectorOfWeakReferences,
+    this.vectorOfStrongReferrables,
+    this.coOwningReference,
+    this.vectorOfCoOwningReferences,
+    this.nonOwningReference,
+    this.vectorOfNonOwningReferences,
+    this.anyUnique,
+    this.anyUniqueType,
+    this.anyAmbiguous,
+    this.anyAmbiguousType,
+    this.vectorOfEnums,
+    this.signedEnum,
+    this.testrequirednestedflatbuffer,
+    this.scalarKeySortedTables,
+    this.nativeInline,
+    this.longEnumNonEnumDefault,
+    this.longEnumNormalDefault,
+    this.nanDefault,
+    this.infDefault,
+    this.positiveInfDefault,
+    this.infinityDefault,
+    this.positiveInfinityDefault,
+    this.negativeInfDefault,
+    this.negativeInfinityDefault,
+    this.doubleInfDefault,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -1999,7 +1952,18 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
         : fbBuilder.writeString(_name!);
     final int? inventoryOffset = _inventory == null ? null
         : fbBuilder.writeListUint8(_inventory!);
-    final int? testOffset = _test?.getOrCreateOffset(fbBuilder);
+    var testOffset = 0;
+    if (_test != null && _testType != null) {
+      if (_testType == AnyTypeId.Monster) {
+        testOffset = (_test as MonsterObjectBuilder).finish(fbBuilder);
+      }
+ else if (_testType == AnyTypeId.TestSimpleTableWithEnum) {
+        testOffset = (_test as TestSimpleTableWithEnumObjectBuilder).finish(fbBuilder);
+      }
+ else if (_testType == AnyTypeId.MyGame_Example2_Monster) {
+        testOffset = (_test as MonsterObjectBuilder).finish(fbBuilder);
+      }
+    }
     final int? test4Offset = _test4 == null ? null
         : fbBuilder.writeListOfStructs(_test4!);
     final int? testarrayofstringOffset = _testarrayofstring == null ? null
@@ -2035,8 +1999,30 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
         : fbBuilder.writeListUint64(_vectorOfCoOwningReferences!);
     final int? vectorOfNonOwningReferencesOffset = _vectorOfNonOwningReferences == null ? null
         : fbBuilder.writeListUint64(_vectorOfNonOwningReferences!);
-    final int? anyUniqueOffset = _anyUnique?.getOrCreateOffset(fbBuilder);
-    final int? anyAmbiguousOffset = _anyAmbiguous?.getOrCreateOffset(fbBuilder);
+    var anyUniqueOffset = 0;
+    if (_anyUnique != null && _anyUniqueType != null) {
+      if (_anyUniqueType == AnyUniqueAliasesTypeId.M) {
+        anyUniqueOffset = (_anyUnique as MonsterObjectBuilder).finish(fbBuilder);
+      }
+ else if (_anyUniqueType == AnyUniqueAliasesTypeId.TS) {
+        anyUniqueOffset = (_anyUnique as TestSimpleTableWithEnumObjectBuilder).finish(fbBuilder);
+      }
+ else if (_anyUniqueType == AnyUniqueAliasesTypeId.M2) {
+        anyUniqueOffset = (_anyUnique as MonsterObjectBuilder).finish(fbBuilder);
+      }
+    }
+    var anyAmbiguousOffset = 0;
+    if (_anyAmbiguous != null && _anyAmbiguousType != null) {
+      if (_anyAmbiguousType == AnyAmbiguousAliasesTypeId.M1) {
+        anyAmbiguousOffset = (_anyAmbiguous as MonsterObjectBuilder).finish(fbBuilder);
+      }
+ else if (_anyAmbiguousType == AnyAmbiguousAliasesTypeId.M2) {
+        anyAmbiguousOffset = (_anyAmbiguous as MonsterObjectBuilder).finish(fbBuilder);
+      }
+ else if (_anyAmbiguousType == AnyAmbiguousAliasesTypeId.M3) {
+        anyAmbiguousOffset = (_anyAmbiguous as MonsterObjectBuilder).finish(fbBuilder);
+      }
+    }
     final int? vectorOfEnumsOffset = _vectorOfEnums == null ? null
         : fbBuilder.writeListUint8(_vectorOfEnums!.map((f) => f.value).toList());
     final int? testrequirednestedflatbufferOffset = _testrequirednestedflatbuffer == null ? null
@@ -2044,15 +2030,15 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     final int? scalarKeySortedTablesOffset = _scalarKeySortedTables == null ? null
         : fbBuilder.writeList(_scalarKeySortedTables!.map((b) => b.getOrCreateOffset(fbBuilder)).toList());
     fbBuilder.startTable(62);
-    if (_pos != null) {
-      fbBuilder.addStruct(0, _pos!.finish(fbBuilder));
+    if (pos != null) {
+      fbBuilder.addStruct(0, pos!.finish(fbBuilder));
     }
-    fbBuilder.addInt16(1, _mana);
-    fbBuilder.addInt16(2, _hp);
+    fbBuilder.addInt16(1, mana);
+    fbBuilder.addInt16(2, hp);
     fbBuilder.addOffset(3, nameOffset);
     fbBuilder.addOffset(5, inventoryOffset);
-    fbBuilder.addUint8(6, _color?.value);
-    fbBuilder.addUint8(7, _testType?.value);
+    fbBuilder.addUint8(6, color?.value);
+    fbBuilder.addUint8(7, testType?.value ?? 0);
     fbBuilder.addOffset(8, testOffset);
     fbBuilder.addOffset(9, test4Offset);
     fbBuilder.addOffset(10, testarrayofstringOffset);
@@ -2060,19 +2046,19 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     fbBuilder.addOffset(12, enemyOffset);
     fbBuilder.addOffset(13, testnestedflatbufferOffset);
     fbBuilder.addOffset(14, testemptyOffset);
-    fbBuilder.addBool(15, _testbool);
-    fbBuilder.addInt32(16, _testhashs32Fnv1);
-    fbBuilder.addUint32(17, _testhashu32Fnv1);
-    fbBuilder.addInt64(18, _testhashs64Fnv1);
-    fbBuilder.addUint64(19, _testhashu64Fnv1);
-    fbBuilder.addInt32(20, _testhashs32Fnv1a);
-    fbBuilder.addUint32(21, _testhashu32Fnv1a);
-    fbBuilder.addInt64(22, _testhashs64Fnv1a);
-    fbBuilder.addUint64(23, _testhashu64Fnv1a);
+    fbBuilder.addBool(15, testbool);
+    fbBuilder.addInt32(16, testhashs32Fnv1);
+    fbBuilder.addUint32(17, testhashu32Fnv1);
+    fbBuilder.addInt64(18, testhashs64Fnv1);
+    fbBuilder.addUint64(19, testhashu64Fnv1);
+    fbBuilder.addInt32(20, testhashs32Fnv1a);
+    fbBuilder.addUint32(21, testhashu32Fnv1a);
+    fbBuilder.addInt64(22, testhashs64Fnv1a);
+    fbBuilder.addUint64(23, testhashu64Fnv1a);
     fbBuilder.addOffset(24, testarrayofboolsOffset);
-    fbBuilder.addFloat32(25, _testf);
-    fbBuilder.addFloat32(26, _testf2);
-    fbBuilder.addFloat32(27, _testf3);
+    fbBuilder.addFloat32(25, testf);
+    fbBuilder.addFloat32(26, testf2);
+    fbBuilder.addFloat32(27, testf3);
     fbBuilder.addOffset(28, testarrayofstring2Offset);
     fbBuilder.addOffset(29, testarrayofsortedstructOffset);
     fbBuilder.addOffset(30, flexOffset);
@@ -2081,34 +2067,34 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     fbBuilder.addOffset(33, vectorOfDoublesOffset);
     fbBuilder.addOffset(34, parentNamespaceTestOffset);
     fbBuilder.addOffset(35, vectorOfReferrablesOffset);
-    fbBuilder.addUint64(36, _singleWeakReference);
+    fbBuilder.addUint64(36, singleWeakReference);
     fbBuilder.addOffset(37, vectorOfWeakReferencesOffset);
     fbBuilder.addOffset(38, vectorOfStrongReferrablesOffset);
-    fbBuilder.addUint64(39, _coOwningReference);
+    fbBuilder.addUint64(39, coOwningReference);
     fbBuilder.addOffset(40, vectorOfCoOwningReferencesOffset);
-    fbBuilder.addUint64(41, _nonOwningReference);
+    fbBuilder.addUint64(41, nonOwningReference);
     fbBuilder.addOffset(42, vectorOfNonOwningReferencesOffset);
-    fbBuilder.addUint8(43, _anyUniqueType?.value);
+    fbBuilder.addUint8(43, anyUniqueType?.value ?? 0);
     fbBuilder.addOffset(44, anyUniqueOffset);
-    fbBuilder.addUint8(45, _anyAmbiguousType?.value);
+    fbBuilder.addUint8(45, anyAmbiguousType?.value ?? 0);
     fbBuilder.addOffset(46, anyAmbiguousOffset);
     fbBuilder.addOffset(47, vectorOfEnumsOffset);
-    fbBuilder.addInt8(48, _signedEnum?.value);
+    fbBuilder.addInt8(48, signedEnum?.value);
     fbBuilder.addOffset(49, testrequirednestedflatbufferOffset);
     fbBuilder.addOffset(50, scalarKeySortedTablesOffset);
-    if (_nativeInline != null) {
-      fbBuilder.addStruct(51, _nativeInline!.finish(fbBuilder));
+    if (nativeInline != null) {
+      fbBuilder.addStruct(51, nativeInline!.finish(fbBuilder));
     }
-    fbBuilder.addUint64(52, _longEnumNonEnumDefault?.value);
-    fbBuilder.addUint64(53, _longEnumNormalDefault?.value);
-    fbBuilder.addFloat32(54, _nanDefault);
-    fbBuilder.addFloat32(55, _infDefault);
-    fbBuilder.addFloat32(56, _positiveInfDefault);
-    fbBuilder.addFloat32(57, _infinityDefault);
-    fbBuilder.addFloat32(58, _positiveInfinityDefault);
-    fbBuilder.addFloat32(59, _negativeInfDefault);
-    fbBuilder.addFloat32(60, _negativeInfinityDefault);
-    fbBuilder.addFloat64(61, _doubleInfDefault);
+    fbBuilder.addUint64(52, longEnumNonEnumDefault?.value);
+    fbBuilder.addUint64(53, longEnumNormalDefault?.value);
+    fbBuilder.addFloat32(54, nanDefault);
+    fbBuilder.addFloat32(55, infDefault);
+    fbBuilder.addFloat32(56, positiveInfDefault);
+    fbBuilder.addFloat32(57, infinityDefault);
+    fbBuilder.addFloat32(58, positiveInfinityDefault);
+    fbBuilder.addFloat32(59, negativeInfDefault);
+    fbBuilder.addFloat32(60, negativeInfinityDefault);
+    fbBuilder.addFloat64(61, doubleInfDefault);
     return fbBuilder.endTable();
   }
 
@@ -2298,45 +2284,33 @@ class TypeAliasesBuilder {
 }
 
 class TypeAliasesObjectBuilder extends fb.ObjectBuilder {
-  final int? _i8;
-  final int? _u8;
-  final int? _i16;
-  final int? _u16;
-  final int? _i32;
-  final int? _u32;
-  final int? _i64;
-  final int? _u64;
-  final double? _f32;
-  final double? _f64;
-  final List<int>? _v8;
-  final List<double>? _vf64;
+  int? i8;
+  int? u8;
+  int? i16;
+  int? u16;
+  int? i32;
+  int? u32;
+  int? i64;
+  int? u64;
+  double? f32;
+  double? f64;
+  List<int>? v8;
+  List<double>? vf64;
 
   TypeAliasesObjectBuilder({
-    int? i8,
-    int? u8,
-    int? i16,
-    int? u16,
-    int? i32,
-    int? u32,
-    int? i64,
-    int? u64,
-    double? f32,
-    double? f64,
-    List<int>? v8,
-    List<double>? vf64,
-  })
-      : _i8 = i8,
-        _u8 = u8,
-        _i16 = i16,
-        _u16 = u16,
-        _i32 = i32,
-        _u32 = u32,
-        _i64 = i64,
-        _u64 = u64,
-        _f32 = f32,
-        _f64 = f64,
-        _v8 = v8,
-        _vf64 = vf64;
+    this.i8,
+    this.u8,
+    this.i16,
+    this.u16,
+    this.i32,
+    this.u32,
+    this.i64,
+    this.u64,
+    this.f32,
+    this.f64,
+    this.v8,
+    this.vf64,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -2346,16 +2320,16 @@ class TypeAliasesObjectBuilder extends fb.ObjectBuilder {
     final int? vf64Offset = _vf64 == null ? null
         : fbBuilder.writeListFloat64(_vf64!);
     fbBuilder.startTable(12);
-    fbBuilder.addInt8(0, _i8);
-    fbBuilder.addUint8(1, _u8);
-    fbBuilder.addInt16(2, _i16);
-    fbBuilder.addUint16(3, _u16);
-    fbBuilder.addInt32(4, _i32);
-    fbBuilder.addUint32(5, _u32);
-    fbBuilder.addInt64(6, _i64);
-    fbBuilder.addUint64(7, _u64);
-    fbBuilder.addFloat32(8, _f32);
-    fbBuilder.addFloat64(9, _f64);
+    fbBuilder.addInt8(0, i8);
+    fbBuilder.addUint8(1, u8);
+    fbBuilder.addInt16(2, i16);
+    fbBuilder.addUint16(3, u16);
+    fbBuilder.addInt32(4, i32);
+    fbBuilder.addUint32(5, u32);
+    fbBuilder.addInt64(6, i64);
+    fbBuilder.addUint64(7, u64);
+    fbBuilder.addFloat32(8, f32);
+    fbBuilder.addFloat64(9, f64);
     fbBuilder.addOffset(10, v8Offset);
     fbBuilder.addOffset(11, vf64Offset);
     return fbBuilder.endTable();

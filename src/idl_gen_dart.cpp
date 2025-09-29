@@ -395,7 +395,7 @@ class DartGenerator : public BaseGenerator {
       if (type.enum_def->is_union && type.base_type != BASE_TYPE_UNION) {
         return namer_.Type(*type.enum_def) + "TypeId";
       } else if (type.enum_def->is_union) {
-        return "dynamic";
+        return "Object";
       } else if (type.base_type != BASE_TYPE_VECTOR) {
         return namer_.Type(*type.enum_def);
       }
@@ -950,42 +950,31 @@ class DartGenerator : public BaseGenerator {
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
 
-      code += "  final " +
-              GenDartTypeName(field.value.type, struct_def.defined_namespace,
-                              field, !struct_def.fixed, "ObjectBuilder") +
-              " _" + namer_.Variable(field) + ";\n";
-    }
-    code += "\n";
-    code += "  " + builder_name + "(";
-
-    if (non_deprecated_fields.size() != 0) {
-      code += "{\n";
-      for (auto it = non_deprecated_fields.begin();
-           it != non_deprecated_fields.end(); ++it) {
-        const FieldDef& field = *it->second;
-
-        code += "    ";
-        code += (struct_def.fixed ? "required " : "") +
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        code += "  " +
                 GenDartTypeName(field.value.type, struct_def.defined_namespace,
                                 field, !struct_def.fixed, "ObjectBuilder") +
-                " " + namer_.Variable(field) + ",\n";
+                "? " + namer_.Variable(field) + "Type;\n";
+        code += "  Object? " + namer_.Variable(field) + ";\n";
+      } else if (field.value.type.base_type != BASE_TYPE_UTYPE) {
+        code += "  " +
+                GenDartTypeName(field.value.type, struct_def.defined_namespace,
+                                field, !struct_def.fixed, "ObjectBuilder") +
+                " " + namer_.Variable(field) + ";\n";
       }
-      code += "  })\n";
-      code += "      : ";
-      for (auto it = non_deprecated_fields.begin();
-           it != non_deprecated_fields.end(); ++it) {
-        const FieldDef& field = *it->second;
-
-        code += "_" + namer_.Variable(field) + " = " + namer_.Variable(field);
-        if (it == non_deprecated_fields.end() - 1) {
-          code += ";\n\n";
-        } else {
-          code += ",\n        ";
-        }
-      }
-    } else {
-      code += ");\n\n";
     }
+    code += "\n";
+    code += "  " + builder_name + "({\n";
+    for (auto it = non_deprecated_fields.begin();
+         it != non_deprecated_fields.end(); ++it) {
+      const FieldDef& field = *it->second;
+      if (field.value.type.base_type == BASE_TYPE_UTYPE) continue;
+      code += "    this." + namer_.Variable(field) + ",\n";
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        code += "    this." + namer_.Variable(field) + "Type,\n";
+      }
+    }
+    code += "  });\n\n";
 
     code += "  /// Finish building, and store into the [fbBuilder].\n";
     code += "  @override\n";
@@ -1012,6 +1001,45 @@ class DartGenerator : public BaseGenerator {
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
+
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        const auto fname = namer_.Variable(field);
+        const auto fvar = (prependUnderscore ? "_" : "") + fname;
+        const auto tvar = fvar + "Type";
+        const auto offv = fname + std::string("Offset");
+        const auto& uenum = *field.value.type.enum_def;
+
+        code += "    var " + offv + " = 0;\n";
+        code += "    if (" + fvar + " != null && " + tvar + " != null) {\n";
+
+        bool first = true;
+        for (auto ev_it = uenum.Vals().begin(); ev_it != uenum.Vals().end();
+             ++ev_it) {
+          const EnumVal& uval = **ev_it;
+          if (uval.union_type.base_type == BASE_TYPE_NONE) continue;
+
+          std::string cond =
+              tvar + " == " + namer_.Type(uenum) + "TypeId." + uval.name;
+          code += std::string(first ? "      if (" : " else if (") + cond +
+                  ") {\n";
+          first = false;
+
+          if (uval.union_type.base_type == BASE_TYPE_STRUCT) {
+            const auto& sdef = *uval.union_type.struct_def;
+            std::string type_name =
+                pack ? namer_.ObjectType(sdef)
+                     : namer_.Type(sdef) + "ObjectBuilder";
+            code += "        " + offv + " = (" + fvar + " as " + type_name +
+                    ")." + (pack ? "pack" : "finish") + "(fbBuilder);\n";
+          } else if (uval.union_type.base_type == BASE_TYPE_STRING) {
+            code += "        " + offv + " = fbBuilder.writeString(" + fvar +
+                    " as String);\n";
+          }
+          code += "      }\n";
+        }
+        code += "    }\n";
+        continue;
+      }
 
       if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type))
         continue;
@@ -1130,9 +1158,20 @@ class DartGenerator : public BaseGenerator {
       auto offset = it->first;
 
       std::string field_var =
-          (prependUnderscore ? "_" : "") + namer_.Variable(field);
+          (prependUnderscore ? "" : "") + namer_.Variable(field);
 
-      if (IsScalar(field.value.type.base_type)) {
+      if (field.value.type.base_type == BASE_TYPE_UTYPE) {
+        std::string union_name = field.name;
+        union_name.resize(union_name.size() - strlen("_type"));
+        const FieldDef *union_field = struct_def.fields.Lookup(union_name);
+        if (union_field) {
+          code += "    fbBuilder.addUint8(" + NumToString(offset) + ", " +
+                  namer_.Variable(*union_field) + "Type?.value ?? 0);\n";
+        }
+      } else if (field.value.type.base_type == BASE_TYPE_UNION) {
+        code += "    fbBuilder.addOffset(" + NumToString(offset) + ", " +
+                namer_.Variable(field) + "Offset);\n";
+      } else if (IsScalar(field.value.type.base_type)) {
         code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
                 NumToString(offset) + ", " + field_var;
         if (field.value.type.enum_def) {

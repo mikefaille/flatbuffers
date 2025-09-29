@@ -213,30 +213,26 @@ class KeywordsInTableBuilder {
 }
 
 class KeywordsInTableObjectBuilder extends fb.ObjectBuilder {
-  final Abc? _$is;
-  final Public? _private;
-  final int? _type;
-  final bool? _$default;
+  Abc? $is;
+  Public? private;
+  int? type;
+  bool? $default;
 
   KeywordsInTableObjectBuilder({
-    Abc? $is,
-    Public? private,
-    int? type,
-    bool? $default,
-  })
-      : _$is = $is,
-        _private = private,
-        _type = type,
-        _$default = $default;
+    this.$is,
+    this.private,
+    this.type,
+    this.$default,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
     fbBuilder.startTable(4);
-    fbBuilder.addInt32(0, _$is?.value);
-    fbBuilder.addInt32(1, _private?.value);
-    fbBuilder.addInt32(2, _type);
-    fbBuilder.addBool(3, _$default);
+    fbBuilder.addInt32(0, $is?.value);
+    fbBuilder.addInt32(1, private?.value);
+    fbBuilder.addInt32(2, type);
+    fbBuilder.addBool(3, $default);
     return fbBuilder.endTable();
   }
 
@@ -261,7 +257,7 @@ class Table2 {
   final int _bcOffset;
 
   KeywordsInUnionTypeId? get typeType => KeywordsInUnionTypeId._createOrNull(const fb.Uint8Reader().vTableGetNullable(_bc, _bcOffset, 4));
-  dynamic get type {
+  Object? get type {
     switch (typeType?.value) {
       case 1: return KeywordsInTable.reader.vTableGetNullable(_bc, _bcOffset, 6);
       case 2: return KeywordsInTable.reader.vTableGetNullable(_bc, _bcOffset, 6);
@@ -286,7 +282,7 @@ class Table2 {
 
 class Table2T implements fb.Packable {
   KeywordsInUnionTypeId? typeType;
-  dynamic type;
+  Object? type;
 
   Table2T({
       this.typeType,
@@ -294,9 +290,17 @@ class Table2T implements fb.Packable {
 
   @override
   int pack(fb.Builder fbBuilder) {
-    final int? typeOffset = type?.pack(fbBuilder);
+    var typeOffset = 0;
+    if (type != null && typeType != null) {
+      if (typeType == KeywordsInUnionTypeId.static) {
+        typeOffset = (type as KeywordsInTableT).pack(fbBuilder);
+      }
+ else if (typeType == KeywordsInUnionTypeId.internal) {
+        typeOffset = (type as KeywordsInTableT).pack(fbBuilder);
+      }
+    }
     fbBuilder.startTable(2);
-    fbBuilder.addUint8(0, typeType?.value);
+    fbBuilder.addUint8(0, typeType?.value ?? 0);
     fbBuilder.addOffset(1, typeOffset);
     return fbBuilder.endTable();
   }
@@ -339,22 +343,28 @@ class Table2Builder {
 }
 
 class Table2ObjectBuilder extends fb.ObjectBuilder {
-  final KeywordsInUnionTypeId? _typeType;
-  final dynamic _type;
+  Object?? typeType;
+  Object? type;
 
   Table2ObjectBuilder({
-    KeywordsInUnionTypeId? typeType,
-    dynamic type,
-  })
-      : _typeType = typeType,
-        _type = type;
+    this.type,
+    this.typeType,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    final int? typeOffset = _type?.getOrCreateOffset(fbBuilder);
+    var typeOffset = 0;
+    if (_type != null && _typeType != null) {
+      if (_typeType == KeywordsInUnionTypeId.static) {
+        typeOffset = (_type as KeywordsInTableObjectBuilder).finish(fbBuilder);
+      }
+ else if (_typeType == KeywordsInUnionTypeId.internal) {
+        typeOffset = (_type as KeywordsInTableObjectBuilder).finish(fbBuilder);
+      }
+    }
     fbBuilder.startTable(2);
-    fbBuilder.addUint8(0, _typeType?.value);
+    fbBuilder.addUint8(0, typeType?.value ?? 0);
     fbBuilder.addOffset(1, typeOffset);
     return fbBuilder.endTable();
   }

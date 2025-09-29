@@ -60,7 +60,8 @@ class _InParentNamespaceReader extends fb.TableReader<InParentNamespace> {
 
 class InParentNamespaceObjectBuilder extends fb.ObjectBuilder {
 
-  InParentNamespaceObjectBuilder();
+  InParentNamespaceObjectBuilder({
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override

@@ -107,12 +107,11 @@ class UnusedBuilder {
 }
 
 class UnusedObjectBuilder extends fb.ObjectBuilder {
-  final int _a;
+  int a;
 
   UnusedObjectBuilder({
-    required int a,
-  })
-      : _a = a;
+    this.a,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -205,12 +204,11 @@ class TableBBuilder {
 }
 
 class TableBObjectBuilder extends fb.ObjectBuilder {
-  final TableAObjectBuilder? _a;
+  TableAObjectBuilder? a;
 
   TableBObjectBuilder({
-    TableAObjectBuilder? a,
-  })
-      : _a = a;
+    this.a,
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
