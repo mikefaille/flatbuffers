@@ -18,6 +18,7 @@ main() {
     defineReflectiveTests(CheckOtherLangaugesData);
     defineReflectiveTests(GeneratorTest);
     defineReflectiveTests(ListOfEnumsTest);
+    defineReflectiveTests(UnionObjectBuilderTest);
   });
 }
 
@@ -1009,6 +1010,72 @@ class ListOfEnumsTest {
     expect(mytable_read.options![0].value, example3.OptionsEnum.A.value);
     expect(mytable_read.options![1].value, example3.OptionsEnum.B.value);
     expect(mytable_read.options![2].value, example3.OptionsEnum.C.value);
+  }
+}
+
+@reflectiveTest
+class UnionObjectBuilderTest {
+  void test_roundTrip() {
+    // Test with null union
+    final builder1 = example.MonsterObjectBuilder(name: 'null union');
+    final monster1 = example.Monster(builder1.toBytes());
+    expect(monster1.name, 'null union');
+    expect(monster1.testType, example.AnyTypeId.NONE);
+    expect(monster1.test, isNull);
+
+    // Test with Monster
+    final builder2 = example.MonsterObjectBuilder(
+        name: 'monster union',
+        testType: example.AnyTypeId.Monster,
+        test: example.MonsterObjectBuilder(name: 'Fred'));
+    final monster2 = example.Monster(builder2.toBytes());
+    expect(monster2.name, 'monster union');
+    expect(monster2.testType, example.AnyTypeId.Monster);
+    expect(monster2.test, isA<example.Monster>());
+    expect((monster2.test as example.Monster).name, 'Fred');
+
+    // Test with TestSimpleTableWithEnum
+    final builder3 = example.MonsterObjectBuilder(
+      name: 'table with enum union',
+      testType: example.AnyTypeId.TestSimpleTableWithEnum,
+      test: example.TestSimpleTableWithEnumObjectBuilder(
+          color: example.Color.Green),
+    );
+    final monster3 = example.Monster(builder3.toBytes());
+    expect(monster3.name, 'table with enum union');
+    expect(monster3.testType, example.AnyTypeId.TestSimpleTableWithEnum);
+    expect(monster3.test, isA<example.TestSimpleTableWithEnum>());
+    expect((monster3.test as example.TestSimpleTableWithEnum).color,
+        example.Color.Green);
+  }
+
+  void test_mismatchedType() {
+    final builder = example.MonsterObjectBuilder(
+      name: 'mismatched',
+      testType: example.AnyTypeId.Monster,
+      test: example.TestSimpleTableWithEnumObjectBuilder(
+          color: example.Color.Red),
+    );
+    expect(() => builder.toBytes(), throwsStateError);
+  }
+
+  void test_inconsistentNull() {
+    // This should throw an assertion error because test is set but testType is not.
+    // Note: Assertions are only enabled in debug mode.
+    expect(
+        () => example.MonsterObjectBuilder(
+              name: 'inconsistent null',
+              test: example.MonsterObjectBuilder(name: 'Fred'),
+            ),
+        throwsA(isA<AssertionError>()));
+
+    // This should throw an assertion error because testType is set but test is not.
+    expect(
+        () => example.MonsterObjectBuilder(
+              name: 'inconsistent null 2',
+              testType: example.AnyTypeId.Monster,
+            ),
+        throwsA(isA<AssertionError>()));
   }
 }
 

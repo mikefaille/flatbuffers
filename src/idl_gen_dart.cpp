@@ -597,35 +597,42 @@ class DartGenerator : public BaseGenerator {
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
+      if (field.value.type.base_type == BASE_TYPE_UTYPE) { continue; }
 
       const std::string field_name = namer_.Field(field);
       if (!constructor_args.empty()) constructor_args += ",\n";
-      constructor_args += "      " + field_name + ": ";
 
       const Type& type = field.value.type;
-      std::string defaultValue = getDefaultValue(field.value);
-      bool isNullable = defaultValue.empty() && !struct_def.fixed;
-      std::string nullableValueAccessOperator = isNullable ? "?" : "";
-      if (type.base_type == BASE_TYPE_STRUCT) {
+      if (type.base_type == BASE_TYPE_UNION) {
         constructor_args +=
-            field_name + nullableValueAccessOperator + ".unpack()";
-      } else if (type.base_type == BASE_TYPE_VECTOR) {
-        if (type.VectorType().base_type == BASE_TYPE_STRUCT) {
-          constructor_args += field_name + nullableValueAccessOperator +
-                              ".map((e) => e.unpack()).toList()";
-        } else {
-          constructor_args +=
-              GenReaderTypeName(field.value.type, struct_def.defined_namespace,
-                                field, false, false);
-          constructor_args += ".vTableGet";
-          std::string offset = NumToString(field.value.offset);
-          constructor_args +=
-              isNullable
-                  ? "Nullable(_bc, _bcOffset, " + offset + ")"
-                  : "(_bc, _bcOffset, " + offset + ", " + defaultValue + ")";
-        }
+            "      " + field_name + "Type: " + field_name + "Type,\n";
+        constructor_args += "      " + field_name + ": " + field_name;
       } else {
-        constructor_args += field_name;
+        constructor_args += "      " + field_name + ": ";
+        std::string defaultValue = getDefaultValue(field.value);
+        bool isNullable = defaultValue.empty() && !struct_def.fixed;
+        std::string nullableValueAccessOperator = isNullable ? "?" : "";
+        if (type.base_type == BASE_TYPE_STRUCT) {
+          constructor_args +=
+              field_name + nullableValueAccessOperator + ".unpack()";
+        } else if (type.base_type == BASE_TYPE_VECTOR) {
+          if (type.VectorType().base_type == BASE_TYPE_STRUCT) {
+            constructor_args += field_name + nullableValueAccessOperator +
+                                ".map((e) => e.unpack()).toList()";
+          } else {
+            constructor_args += GenReaderTypeName(
+                field.value.type, struct_def.defined_namespace, field, false,
+                false);
+            constructor_args += ".vTableGet";
+            std::string offset = NumToString(field.value.offset);
+            constructor_args +=
+                isNullable
+                    ? "Nullable(_bc, _bcOffset, " + offset + ")"
+                    : "(_bc, _bcOffset, " + offset + ", " + defaultValue + ")";
+          }
+        } else {
+          constructor_args += field_name;
+        }
       }
     }
 
@@ -950,42 +957,71 @@ class DartGenerator : public BaseGenerator {
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
 
-      code += "  final " +
-              GenDartTypeName(field.value.type, struct_def.defined_namespace,
-                              field, !struct_def.fixed, "ObjectBuilder") +
-              " _" + namer_.Variable(field) + ";\n";
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        const auto fname = namer_.Variable(field);
+        const auto etype =
+            namer_.Type(*field.value.type.enum_def) + "TypeId";
+        code += "  final " + etype + "? " + fname + "Type;\n";
+        code += "  final Object? " + fname + ";\n";
+      } else if (field.value.type.base_type != BASE_TYPE_UTYPE) {
+        code += "  final " +
+                GenDartTypeName(field.value.type, struct_def.defined_namespace,
+                                field, !struct_def.fixed, "ObjectBuilder") +
+                " " + namer_.Variable(field) + ";\n";
+      }
     }
     code += "\n";
     code += "  " + builder_name + "(";
 
-    if (non_deprecated_fields.size() != 0) {
+    bool has_fields = false;
+    for (auto it = non_deprecated_fields.begin();
+         it != non_deprecated_fields.end(); ++it) {
+      const FieldDef& field = *(*it).second;
+      if (field.value.type.base_type != BASE_TYPE_UTYPE) {
+        has_fields = true;
+        break;
+      }
+    }
+
+    if (has_fields) {
       code += "{\n";
       for (auto it = non_deprecated_fields.begin();
            it != non_deprecated_fields.end(); ++it) {
         const FieldDef& field = *it->second;
 
-        code += "    ";
-        code += (struct_def.fixed ? "required " : "") +
-                GenDartTypeName(field.value.type, struct_def.defined_namespace,
-                                field, !struct_def.fixed, "ObjectBuilder") +
-                " " + namer_.Variable(field) + ",\n";
-      }
-      code += "  })\n";
-      code += "      : ";
-      for (auto it = non_deprecated_fields.begin();
-           it != non_deprecated_fields.end(); ++it) {
-        const FieldDef& field = *it->second;
-
-        code += "_" + namer_.Variable(field) + " = " + namer_.Variable(field);
-        if (it == non_deprecated_fields.end() - 1) {
-          code += ";\n\n";
-        } else {
-          code += ",\n        ";
+        if (field.value.type.base_type == BASE_TYPE_UNION) {
+          const auto fname = namer_.Variable(field);
+          code += "    this." + fname + ",\n";
+          code += "    this." + fname + "Type,\n";
+        } else if (field.value.type.base_type != BASE_TYPE_UTYPE) {
+          code += "    " + std::string(struct_def.fixed ? "required " : "") +
+                  "this." + namer_.Variable(field) + ",\n";
         }
       }
+      code += "  })";
     } else {
-      code += ");\n\n";
+      code += ")";
     }
+
+    std::string asserts;
+    for (auto it = non_deprecated_fields.begin();
+         it != non_deprecated_fields.end(); ++it) {
+      const FieldDef& field = *it->second;
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        if (!asserts.empty()) asserts += ",\n       ";
+        const auto fname = namer_.Variable(field);
+        const auto etype =
+            namer_.Type(*field.value.type.enum_def) + "TypeId";
+        asserts += "assert((" + fname + " == null) == (" + fname +
+                   "Type == null || " + etype + ".NONE == " + fname +
+                   "Type), 'Union " + fname +
+                   " requires matching type and value')";
+      }
+    }
+    if (!asserts.empty()) {
+      code += "\n      : " + asserts;
+    }
+    code += ";\n\n";
 
     code += "  /// Finish building, and store into the [fbBuilder].\n";
     code += "  @override\n";
