@@ -120,7 +120,7 @@ grep -rl 'FLATBUFFERS_\d*' *  --exclude=release.sh | xargs -i@ \
   sed -i \
     -e "s/\(FLATBUFFERS_\)[0-9]\{2\}.*()/\1$version_underscore()/g" \
     @
-  
+
 echo "Updating MODULES.bazel..."
 sed -i \
   "3s/version = \".*\"/version = \"$version\"/" \
