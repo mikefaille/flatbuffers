@@ -69,7 +69,8 @@ class UnusedT implements fb.Packable {
   int a;
 
   UnusedT({
-      required this.a});
+      required this.a
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -160,7 +161,8 @@ class TableBT implements fb.Packable {
   TableAT? a;
 
   TableBT({
-      this.a});
+      this.a
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

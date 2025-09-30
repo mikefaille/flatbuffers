@@ -39,7 +39,8 @@ class TableAT implements fb.Packable {
   my_game_other_name_space.TableBT? b;
 
   TableAT({
-      this.b});
+      this.b
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

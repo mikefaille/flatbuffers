@@ -546,40 +546,61 @@ class DartGenerator : public BaseGenerator {
     std::string object_type = namer_.ObjectType(struct_def);
     code += "class " + object_type + " implements " + _kFb + ".Packable {\n";
 
-    std::string constructor_args;
+    std::string constructor_params;
+    std::string initializer_list;
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
 
-      const std::string field_name = namer_.Field(field);
-      const std::string defaultValue = getDefaultValue(field.value);
-      const std::string type_name =
+      const auto field_name = namer_.Field(field);
+      const auto param_name = (field_name.rfind("_", 0) == 0)
+                                  ? field_name.substr(1)
+                                  : field_name;
+      const bool is_private = (field_name != param_name);
+
+      const auto defaultValue = getDefaultValue(field.value);
+      const bool is_nullable = defaultValue.empty() && !struct_def.fixed;
+      const auto type_name =
           GenDartTypeName(field.value.type, struct_def.defined_namespace, field,
-                          defaultValue.empty() && !struct_def.fixed, "T");
+                          is_nullable, "T");
 
       GenDocComment(field.doc_comment, "  ", code);
       code += "  " + type_name + " " + field_name + ";\n";
 
-      if (!constructor_args.empty()) constructor_args += ",\n";
-      constructor_args += "      ";
-      constructor_args += (struct_def.fixed ? "required " : "");
-      constructor_args += "this." + field_name;
+      if (!constructor_params.empty()) constructor_params += ",\n";
+      constructor_params += "      ";
+      if (struct_def.fixed && !is_nullable) {
+        constructor_params += "required ";
+      }
+
+      if (is_private) {
+        constructor_params += type_name + " " + param_name;
+        if (!initializer_list.empty()) { initializer_list += ", "; }
+        initializer_list += field_name + " = " + param_name;
+      } else {
+        constructor_params += "this." + field_name;
+      }
+
       if (!struct_def.fixed && !defaultValue.empty()) {
         if (IsEnum(field.value.type)) {
           auto& enum_def = *field.value.type.enum_def;
           if (auto val = enum_def.FindByValue(defaultValue)) {
-            constructor_args += " = " + namer_.EnumVariant(enum_def, *val);
+            constructor_params += " = " + namer_.EnumVariant(enum_def, *val);
           } else {
-            constructor_args += " = " + namer_.Type(enum_def) + "._default";
+            constructor_params += " = " + namer_.Type(enum_def) + "._default";
           }
         } else {
-          constructor_args += " = " + defaultValue;
+          constructor_params += " = " + defaultValue;
         }
       }
     }
 
-    if (!constructor_args.empty()) {
-      code += "\n  " + object_type + "({\n" + constructor_args + "});\n\n";
+    if (!constructor_params.empty()) {
+      code += "\n  " + object_type + "({\n" + constructor_params + "\n  })";
+      if (!initializer_list.empty()) {
+        code += "\n      : " + initializer_list;
+      }
+      code += ";\n\n";
     }
 
     code += GenStructObjectAPIPack(struct_def, non_deprecated_fields);
@@ -977,7 +998,9 @@ class DartGenerator : public BaseGenerator {
       }
     }
     code += "\n";
-    code += "  " + builder_name + "({\n";
+    std::string constructor_params;
+    std::string initializer_list;
+
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
@@ -985,15 +1008,42 @@ class DartGenerator : public BaseGenerator {
           field.sibling_union_field)
         continue;
       if (field.value.type.base_type == BASE_TYPE_UNION) {
-        GenUnionConstructorParams(field, code);
+        GenUnionConstructorParams(field, constructor_params);
       } else {
-        const std::string v = namer_.Variable(field);
-        code += "    ";
-        if (struct_def.fixed) code += "required ";
-        code += "this." + v + ",\n";
+        const auto field_name = namer_.Variable(field);
+        const auto param_name = (field_name.rfind("_", 0) == 0)
+                                  ? field_name.substr(1)
+                                  : field_name;
+        const bool is_private = (field_name != param_name);
+
+        const auto defaultValue = getDefaultValue(field.value);
+        const bool is_nullable = defaultValue.empty() && !struct_def.fixed;
+        const auto type_name = GenDartTypeName(
+            field.value.type, struct_def.defined_namespace, field, true,
+            "ObjectBuilder");
+
+        constructor_params += "    ";
+        if (struct_def.fixed && !is_nullable) {
+          constructor_params += "required ";
+        }
+
+        if (is_private) {
+          constructor_params += type_name + " " + param_name;
+          if (!initializer_list.empty()) { initializer_list += ", "; }
+          initializer_list += field_name + " = " + param_name;
+        } else {
+          constructor_params += "this." + field_name;
+        }
+        constructor_params += ",\n";
       }
     }
+
+    code += "  " + builder_name + "({\n";
+    code += constructor_params;
     code += "  })";
+    if (!initializer_list.empty()) {
+      code += "\n      : " + initializer_list;
+    }
 
     bool first_assert = true;
     for (auto it = non_deprecated_fields.begin();

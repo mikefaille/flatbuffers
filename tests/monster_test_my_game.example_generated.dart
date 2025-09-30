@@ -268,7 +268,8 @@ class TestT implements fb.Packable {
 
   TestT({
       required this.a,
-      required this.b});
+      required this.b
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -367,7 +368,8 @@ class TestSimpleTableWithEnumT implements fb.Packable {
   Color color;
 
   TestSimpleTableWithEnumT({
-      this.color = Color.Green});
+      this.color = Color.Green
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -480,7 +482,8 @@ class Vec3T implements fb.Packable {
       required this.z,
       required this.test1,
       required this.test2,
-      required this.test3});
+      required this.test3
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -605,7 +608,8 @@ class AbilityT implements fb.Packable {
 
   AbilityT({
       required this.id,
-      required this.distance});
+      required this.distance
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -705,7 +709,8 @@ class StructOfStructsT implements fb.Packable {
   StructOfStructsT({
       required this.a,
       required this.b,
-      required this.c});
+      required this.c
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -802,7 +807,8 @@ class StructOfStructsOfStructsT implements fb.Packable {
   StructOfStructsT a;
 
   StructOfStructsOfStructsT({
-      required this.a});
+      required this.a
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -901,7 +907,8 @@ class StatT implements fb.Packable {
   StatT({
       this.id,
       this.val = 0,
-      this.count = 0});
+      this.count = 0
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -1018,7 +1025,8 @@ class ReferrableT implements fb.Packable {
   int id;
 
   ReferrableT({
-      this.id = 0});
+      this.id = 0
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -1382,7 +1390,8 @@ class MonsterT implements fb.Packable {
       this.positiveInfinityDefault = double.infinity,
       this.negativeInfDefault = double.negativeInfinity,
       this.negativeInfinityDefault = double.negativeInfinity,
-      this.doubleInfDefault = double.infinity});
+      this.doubleInfDefault = double.infinity
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -2145,7 +2154,8 @@ class TypeAliasesT implements fb.Packable {
       this.f32 = 0.0,
       this.f64 = 0.0,
       this.v8,
-      this.vf64});
+      this.vf64
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

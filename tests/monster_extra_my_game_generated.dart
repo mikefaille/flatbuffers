@@ -75,7 +75,8 @@ class MonsterExtraT implements fb.Packable {
       this.f2 = double.infinity,
       this.f3 = double.negativeInfinity,
       this.dvec,
-      this.fvec});
+      this.fvec
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {

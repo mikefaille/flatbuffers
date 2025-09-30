@@ -155,7 +155,8 @@ class KeywordsInTableT implements fb.Packable {
       this.$is = Abc.$void,
       this.private = Public.NONE,
       this.type = 0,
-      this.$default = false});
+      this.$default = false
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
@@ -286,7 +287,8 @@ class Table2T implements fb.Packable {
 
   Table2T({
       this.typeType,
-      this.type});
+      this.type
+  });
 
   @override
   int pack(fb.Builder fbBuilder) {
