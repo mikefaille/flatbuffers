@@ -963,13 +963,12 @@ class DartGenerator : public BaseGenerator {
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
-      if (field.value.type.base_type == BASE_TYPE_UTYPE && field.sibling_union_field) continue;
+      if (field.value.type.base_type == BASE_TYPE_UTYPE &&
+          field.sibling_union_field)
+        continue;
 
       if (field.value.type.base_type == BASE_TYPE_UNION) {
-        const std::string fname = namer_.Variable(field);
-        const std::string etype = namer_.Type(*field.value.type.enum_def) + "TypeId";
-        code += "  final " + etype + "? " + fname + "Type;\n";
-        code += "  final Object? " + fname + ";\n";
+        GenUnionFieldDeclarations(field, code);
       } else {
         code += "  final " +
                 GenDartTypeName(field.value.type, struct_def.defined_namespace,
@@ -982,15 +981,16 @@ class DartGenerator : public BaseGenerator {
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
-      if (field.value.type.base_type == BASE_TYPE_UTYPE && field.sibling_union_field) continue;
-      const std::string v = namer_.Variable(field);
+      if (field.value.type.base_type == BASE_TYPE_UTYPE &&
+          field.sibling_union_field)
+        continue;
       if (field.value.type.base_type == BASE_TYPE_UNION) {
-        code += "    this." + v + "Type,\n";
-        code += "    this." + v + ",\n";
+        GenUnionConstructorParams(field, code);
       } else {
-         code += "    ";
-         if (struct_def.fixed) code += "required ";
-         code += "this." + v + ",\n";
+        const std::string v = namer_.Variable(field);
+        code += "    ";
+        if (struct_def.fixed) code += "required ";
+        code += "this." + v + ",\n";
       }
     }
     code += "  })";
@@ -1001,11 +1001,12 @@ class DartGenerator : public BaseGenerator {
       const FieldDef& field = *it->second;
       if (field.value.type.base_type != BASE_TYPE_UNION) continue;
       const std::string v = namer_.Variable(field);
-      const std::string etype = namer_.Type(*field.value.type.enum_def) + "TypeId";
-      code += (first_assert ? " : " : ",\n    ")
-           +  std::string("assert((") + v + " == null) == (" + v
-           +  "Type == null || " + v + "Type == " + etype + ".NONE), "
-           +  "'Union " + v + " requires matching type and value')";
+      const std::string etype =
+          namer_.Type(*field.value.type.enum_def) + "TypeId";
+      code += (first_assert ? " : " : ",\n    ") + std::string("assert((") +
+              v + " == null) == (" + v + "Type == null || " + v + "Type == " +
+              etype + ".NONE), " + "'Union " + v +
+              " requires matching type and value')";
       first_assert = false;
     }
     code += ";\n\n";
@@ -1013,7 +1014,8 @@ class DartGenerator : public BaseGenerator {
     code += "  /// Finish building, and store into the [fbBuilder].\n";
     code += "  @override\n";
     code += "  int finish(" + _kFb + ".Builder fbBuilder) {\n";
-    code += GenObjectBuilderImplementation(struct_def, non_deprecated_fields, false);
+    code +=
+        GenObjectBuilderImplementation(struct_def, non_deprecated_fields, false);
     code += "  }\n\n";
 
     code += "  /// Convenience method to serialize to byte list.\n";
@@ -1033,53 +1035,18 @@ class DartGenerator : public BaseGenerator {
       bool prependUnderscore = false, bool pack = false) {
     std::string code;
 
-    // Generate union offset calculations DYNAMICALLY
     for (auto it = non_deprecated_fields.begin();
-        it != non_deprecated_fields.end(); ++it) {
+         it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
-      if (field.value.type.base_type == BASE_TYPE_UTYPE && field.sibling_union_field) continue;
+      if (field.value.type.base_type == BASE_TYPE_UTYPE &&
+          field.sibling_union_field)
+        continue;
 
       if (field.value.type.base_type == BASE_TYPE_UNION) {
-        const auto fname = namer_.Variable(field);
-        const auto& uenum = *field.value.type.enum_def;
-        const auto enum_name = namer_.Type(uenum) + "TypeId";
-        std::string offset_name = fname + "Offset";
-
-        code += "    final int " + offset_name + " = switch (" + fname + "Type) {\n";
-        code += "      null || " + enum_name + ".NONE => 0,\n";
-
-        // Dynamically generate cases for each union variant
-        for (auto ev_it = uenum.Vals().begin(); ev_it != uenum.Vals().end(); ++ev_it) {
-          const EnumVal& uval = **ev_it;
-          if (uval.union_type.base_type == BASE_TYPE_NONE) continue;
-
-          const auto type_id = enum_name + "." + uval.name;
-
-          if (uval.union_type.base_type == BASE_TYPE_STRING) {
-            code += "      " + type_id + " => fbBuilder.writeString(" + fname +
-                    " as String? ?? (throw StateError('" + fname +
-                    " must be String when type is " + type_id + "'))),\n";
-          } else if (uval.union_type.base_type == BASE_TYPE_STRUCT &&
-                    uval.union_type.struct_def && !uval.union_type.struct_def->fixed) {
-            if (pack) {
-              const auto obj_type = namer_.ObjectType(*uval.union_type.struct_def);
-              code += "      " + type_id + " => (" + fname + " as " + obj_type + "?)" +
-                      "?.pack(fbBuilder) ?? (throw StateError('" + fname +
-                      " must be " + obj_type + " when type is " + type_id + "')),\n";
-            } else {
-              const auto builder_type = namer_.Type(*uval.union_type.struct_def) + "ObjectBuilder";
-              code += "      " + type_id + " => (" + fname + " as " + builder_type + "?)" +
-                      "?.getOrCreateOffset(fbBuilder) ?? (throw StateError('" + fname +
-                      " must be " + builder_type + " when type is " + type_id + "')),\n";
-            }
-          }
-        }
-
-        code += "    };\n\n";
-        continue;  // Skip to next field
+        code += GenUnionOffsetCalculation(field, pack);
+        continue;
       }
 
-      // Handle non-union fields (keep your existing logic)
       if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type))
         continue;
 
@@ -1121,9 +1088,11 @@ class DartGenerator : public BaseGenerator {
     }
 
     if (struct_def.fixed) {
-      code += StructObjectBuilderBody(non_deprecated_fields, prependUnderscore, pack);
+      code += StructObjectBuilderBody(non_deprecated_fields, prependUnderscore,
+                                      pack);
     } else {
-      code += TableObjectBuilderBody(struct_def, non_deprecated_fields, prependUnderscore, pack);
+      code += TableObjectBuilderBody(struct_def, non_deprecated_fields,
+                                     prependUnderscore, pack);
     }
 
     return code;
@@ -1182,27 +1151,17 @@ class DartGenerator : public BaseGenerator {
       std::string field_var =
           (prependUnderscore ? "" : "") + namer_.Variable(field);
 
-      if (IsScalar(field.value.type.base_type)) {
-        if (field.value.type.base_type == BASE_TYPE_UTYPE &&
-            field.sibling_union_field) {
-          const auto union_field_var =
-              namer_.Variable(*field.sibling_union_field);
-          code += "    fbBuilder.addUint8(" +
-                  NumToString(offset) + ", " + union_field_var +
-                  "Type?.value ?? 0);\n";
-        } else {
-          code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
-                  NumToString(offset) + ", " + field_var;
-          if (field.value.type.enum_def) {
-            bool isNullable = getDefaultValue(field.value).empty();
-            code += (isNullable || !pack) ? "?.value" : ".value";
-          }
-          code += ");\n";
+      if (field.value.type.base_type == BASE_TYPE_UTYPE ||
+          field.value.type.base_type == BASE_TYPE_UNION) {
+        GenUnionTableWrites(field, offset, code);
+      } else if (IsScalar(field.value.type.base_type)) {
+        code += "    fbBuilder.add" + GenType(field.value.type) + "(" +
+                NumToString(offset) + ", " + field_var;
+        if (field.value.type.enum_def) {
+          bool isNullable = getDefaultValue(field.value).empty();
+          code += (isNullable || !pack) ? "?.value" : ".value";
         }
-      } else if (field.value.type.base_type == BASE_TYPE_UNION) {
-        const std::string fname = namer_.Variable(field);
-        code += "    fbBuilder.addOffset(" + NumToString(offset) + ", "
-             +  fname + "Offset);\n";
+        code += ");\n";
       } else if (IsStruct(field.value.type)) {
         code += "    if (" + field_var + " != null) {\n";
         code += "      fbBuilder.addStruct(" + NumToString(offset) + ", " +
@@ -1218,6 +1177,107 @@ class DartGenerator : public BaseGenerator {
   }
 
   const IdlNamer namer_;
+
+  // --- Union code generation helpers ---
+
+  /// @brief Generates the Dart fields for a union in an ObjectBuilder.
+  /// @details For a union field `u`, this generates the `final` discriminator
+  /// (`uType`) and value (`u`) fields.
+  /// @param field The union field definition.
+  /// @param[out] code The string to append the generated code to.
+  void GenUnionFieldDeclarations(const FieldDef &field, std::string &code) {
+    const std::string fname = namer_.Variable(field);
+    const std::string etype = namer_.Type(*field.value.type.enum_def) + "TypeId";
+    code += "  final " + etype + "? " + fname + "Type;\n";
+    code += "  final Object? " + fname + ";\n";
+  }
+
+  /// @brief Generates the constructor parameters for a union field in an
+  /// ObjectBuilder.
+  /// @details For a union field `u`, this generates `this.uType` and `this.u`.
+  /// @param field The union field definition.
+  /// @param[out] code The string to append the generated code to.
+  void GenUnionConstructorParams(const FieldDef &field, std::string &code) {
+    const std::string v = namer_.Variable(field);
+    code += "    this." + v + "Type,\n";
+    code += "    this." + v + ",\n";
+  }
+
+  /// @brief Generates the switch-expression to calculate a union's value
+  /// offset.
+  /// @details This is used in the `finish()` and `pack()` methods. It
+  /// dynamically creates a switch over the union's type enum and calls the
+  /// appropriate `fbBuilder` method (`writeString`, `getOrCreateOffset`, or
+  /// `pack`) based on the variant's type.
+  /// @param field The union field definition.
+  /// @param pack Whether to generate code for the `.pack()` method.
+  /// @return A string containing the generated switch expression.
+  std::string GenUnionOffsetCalculation(const FieldDef &field, bool pack) {
+    std::string code;
+    const auto fname = namer_.Variable(field);
+    const auto &uenum = *field.value.type.enum_def;
+    const auto enum_name = namer_.Type(uenum) + "TypeId";
+    std::string offset_name = fname + "Offset";
+
+    code += "    final int " + offset_name + " = switch (" + fname + "Type) {\n";
+    code += "      null || " + enum_name + ".NONE => 0,\n";
+
+    for (auto it = uenum.Vals().begin(); it != uenum.Vals().end(); ++it) {
+      const EnumVal &uval = **it;
+      if (uval.union_type.base_type == BASE_TYPE_NONE) continue;
+
+      const auto type_id = enum_name + "." + uval.name;
+
+      if (uval.union_type.base_type == BASE_TYPE_STRING) {
+        code += "      " + type_id + " => fbBuilder.writeString(" + fname +
+                " as String? ?? (throw StateError('" + fname +
+                " must be String when type is " + type_id + "'))),\n";
+      } else if (uval.union_type.base_type == BASE_TYPE_STRUCT &&
+                 uval.union_type.struct_def &&
+                 !uval.union_type.struct_def->fixed) {
+        if (pack) {
+          const auto obj_type = namer_.ObjectType(*uval.union_type.struct_def);
+          code += "      " + type_id + " => (" + fname + " as " + obj_type +
+                  "?)?.pack(fbBuilder) ?? (throw StateError('" + fname +
+                  " must be " + obj_type + " when type is " + type_id +
+                  "')), // pack\n";
+        } else {
+          const auto builder_type =
+              namer_.Type(*uval.union_type.struct_def) + "ObjectBuilder";
+          code += "      " + type_id +
+                  " => (" + fname + " as " + builder_type +
+                  "?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('" +
+                  fname + " must be " + builder_type + " when type is " +
+                  type_id + "')), // getOrCreateOffset\n";
+        }
+      }
+    }
+
+    code += "    };\n";
+    return code;
+  }
+
+  /// @brief Generates the table writes for a union's type and value fields.
+  /// @details This is used in `TableObjectBuilderBody`. It handles writing the
+  /// `_type` field (discriminator) and the value offset field.
+  /// @param field The union field definition (`_type` or value).
+  /// @param offset The vtable offset for the field.
+  /// @param[out] code The string to append the generated code to.
+  void GenUnionTableWrites(const FieldDef &field, int offset,
+                           std::string &code) {
+    const std::string field_var = namer_.Variable(field);
+    if (field.value.type.base_type == BASE_TYPE_UTYPE && field.sibling_union_field) {
+        // This is the union's type field. Write the discriminator value.
+        const auto union_field_var =
+            namer_.Variable(*field.sibling_union_field);
+        code += "    fbBuilder.addUint8(" + NumToString(offset) + ", " +
+                union_field_var + "Type?.value ?? 0);\n";
+    } else if (field.value.type.base_type == BASE_TYPE_UNION) {
+        // This is the union's value field. Write the calculated offset.
+        code += "    fbBuilder.addOffset(" + NumToString(offset) + ", " +
+                field_var + "Offset);\n";
+    }
+  }
 };
 }  // namespace dart
 
