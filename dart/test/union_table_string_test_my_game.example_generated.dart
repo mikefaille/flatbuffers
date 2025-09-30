@@ -191,7 +191,8 @@ class RootTableT implements fb.Packable {
   @override
   int pack(fb.Builder fbBuilder) {
     final int testUnionOffset = switch (testUnionType) {
-      null || TestUnionTypeId.NONE => 0,
+      null => 0,
+      TestUnionTypeId.NONE => 0,
       TestUnionTypeId.test_table => (testUnion as TestTableT?)?.pack(fbBuilder) ?? (throw StateError('testUnion must be TestTableT when type is TestUnionTypeId.test_table')), // pack
       TestUnionTypeId.test_string => fbBuilder.writeString(testUnion as String? ?? (throw StateError('testUnion must be String when type is TestUnionTypeId.test_string'))),
     };
@@ -245,13 +246,14 @@ class RootTableObjectBuilder extends fb.ObjectBuilder {
   RootTableObjectBuilder({
     this.testUnionType,
     this.testUnion,
-  }) : assert((testUnion == null) == (testUnionType == null || testUnionType == TestUnionTypeId.NONE), 'Union testUnion requires matching type and value');
+  }) : assert((testUnion == null) == (testUnionType == null || testUnionType == TestUnionTypeId.NONE), 'testUnion requires matching type and value');
 
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
     final int testUnionOffset = switch (testUnionType) {
-      null || TestUnionTypeId.NONE => 0,
+      null => 0,
+      TestUnionTypeId.NONE => 0,
       TestUnionTypeId.test_table => (testUnion as TestTableObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('testUnion must be TestTableObjectBuilder when type is TestUnionTypeId.test_table')), // getOrCreateOffset
       TestUnionTypeId.test_string => fbBuilder.writeString(testUnion as String? ?? (throw StateError('testUnion must be String when type is TestUnionTypeId.test_string'))),
     };

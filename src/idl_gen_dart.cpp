@@ -978,23 +978,65 @@ class DartGenerator : public BaseGenerator {
     }
     code += "\n";
     code += "  " + builder_name + "({\n";
+
+    // Collect constructor parameters and check if we need initializer list
+    std::vector<std::string> constructor_params;
+    std::vector<std::string> initializer_assignments;
+    bool needs_initializer_list = false;
+
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
       if (field.value.type.base_type == BASE_TYPE_UTYPE &&
           field.sibling_union_field)
         continue;
+
+      const std::string field_name = namer_.Field(field);
+      const std::string param_name = namer_.Variable(field);
+      const std::string defaultValue = getDefaultValue(field.value);
+      const bool field_is_nullable = defaultValue.empty() && !struct_def.fixed;
+      const bool param_is_required = struct_def.fixed && !field_is_nullable;
+
+      std::string param_line = "    ";
+      if (param_is_required) param_line += "required ";
+
       if (field.value.type.base_type == BASE_TYPE_UNION) {
+        // Handle union fields specially
         GenUnionConstructorParams(field, code);
       } else {
-        const std::string v = namer_.Variable(field);
-        code += "    ";
-        if (struct_def.fixed) code += "required ";
-        code += "this." + v + ",\n";
+        // Check if field name differs from parameter name (indicating private
+        // fields)
+        if (field_name != param_name) {
+          // Use explicit parameter + initializer list pattern
+          param_line +=
+              GenDartTypeName(field.value.type, struct_def.defined_namespace,
+                              field, field_is_nullable, "ObjectBuilder") +
+              " " + param_name + ",\n";
+          constructor_params.push_back(param_line);
+          initializer_assignments.push_back(field_name + " = " + param_name);
+          needs_initializer_list = true;
+        } else {
+          // Use this.field shorthand pattern
+          param_line += "this." + param_name + ",\n";
+          constructor_params.push_back(param_line);
+        }
       }
     }
+
+    // Write constructor parameters
+    for (const auto& param : constructor_params) { code += param; }
     code += "  })";
 
+    // Add initializer list if needed
+    if (needs_initializer_list) {
+      code += "\n      : ";
+      for (size_t i = 0; i < initializer_assignments.size(); ++i) {
+        if (i > 0) code += ",\n        ";
+        code += initializer_assignments[i];
+      }
+    }
+
+    // Add union assertions (keep your excellent work)
     bool first_assert = true;
     for (auto it = non_deprecated_fields.begin();
          it != non_deprecated_fields.end(); ++it) {
@@ -1003,9 +1045,10 @@ class DartGenerator : public BaseGenerator {
       const std::string v = namer_.Variable(field);
       const std::string etype =
           namer_.Type(*field.value.type.enum_def) + "TypeId";
-      code += (first_assert ? " : " : ",\n    ") + std::string("assert((") +
-              v + " == null) == (" + v + "Type == null || " + v + "Type == " +
-              etype + ".NONE), " + "'Union " + v +
+      code += (first_assert ? (needs_initializer_list ? ",\n    " : " : ")
+                            : ",\n    ") +
+              std::string("assert((") + v + " == null) == (" + v +
+              "Type == null || " + v + "Type == " + etype + ".NONE), '" + v +
               " requires matching type and value')";
       first_assert = false;
     }
@@ -1112,18 +1155,20 @@ class DartGenerator : public BaseGenerator {
         code += "    fbBuilder.pad(" + NumToString(field.padding) + ");\n";
       }
 
-      if (IsStruct(field.value.type)) {
-        code += "    ";
-        if (prependUnderscore) {
-          code += "_";
-        }
-        code += field_name + (pack ? ".pack" : ".finish") + "(fbBuilder);\n";
+      std::string field_reference;
+      if (pack) {
+        field_reference = namer_.Field(field);  // Actual field name for pack()
       } else {
-        code += "    fbBuilder.put" + GenType(field.value.type) + "(";
-        if (prependUnderscore) {
-          code += "_";
-        }
-        code += field_name;
+        field_reference = (prependUnderscore ? "" : "") +
+                          namer_.Variable(field);  // Parameter name for constructor
+      }
+
+      if (IsStruct(field.value.type)) {
+        code += "    " + field_reference + (pack ? ".pack" : ".finish") +
+                "(fbBuilder);\n";
+      } else {
+        code += "    fbBuilder.put" + GenType(field.value.type) + "(" +
+                field_reference;
         if (field.value.type.enum_def) {
           code += ".value";
         }
@@ -1148,8 +1193,14 @@ class DartGenerator : public BaseGenerator {
       const FieldDef& field = *it->second;
       auto offset = it->first;
 
-      std::string field_var =
-          (prependUnderscore ? "" : "") + namer_.Variable(field);
+      std::string field_var;
+      if (prependUnderscore) {
+        // For pack() method - use actual field names
+        field_var = namer_.Field(field);  // Uses actual field name (may have _)
+      } else {
+        // For constructor parameters - use variable names
+        field_var = namer_.Variable(field);  // Uses parameter name (no _)
+      }
 
       if (field.value.type.base_type == BASE_TYPE_UTYPE ||
           field.value.type.base_type == BASE_TYPE_UNION) {
