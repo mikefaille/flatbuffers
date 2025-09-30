@@ -1030,77 +1030,102 @@ class DartGenerator : public BaseGenerator {
   std::string GenObjectBuilderImplementation(
       const StructDef& struct_def,
       const std::vector<std::pair<int, FieldDef*>>& non_deprecated_fields,
-      bool /*prependUnderscore*/, bool pack = false) {
+      bool prependUnderscore = false, bool pack = false) {
     std::string code;
+
+    // Generate union offset calculations DYNAMICALLY
     for (auto it = non_deprecated_fields.begin();
-         it != non_deprecated_fields.end(); ++it) {
+        it != non_deprecated_fields.end(); ++it) {
       const FieldDef& field = *it->second;
       if (field.value.type.base_type == BASE_TYPE_UTYPE && field.sibling_union_field) continue;
 
+      if (field.value.type.base_type == BASE_TYPE_UNION) {
+        const auto fname = namer_.Variable(field);
+        const auto& uenum = *field.value.type.enum_def;
+        const auto enum_name = namer_.Type(uenum) + "TypeId";
+        std::string offset_name = fname + "Offset";
+
+        code += "    final int " + offset_name + " = switch (" + fname + "Type) {\n";
+        code += "      null || " + enum_name + ".NONE => 0,\n";
+
+        // Dynamically generate cases for each union variant
+        for (auto ev_it = uenum.Vals().begin(); ev_it != uenum.Vals().end(); ++ev_it) {
+          const EnumVal& uval = **ev_it;
+          if (uval.union_type.base_type == BASE_TYPE_NONE) continue;
+
+          const auto type_id = enum_name + "." + uval.name;
+
+          if (uval.union_type.base_type == BASE_TYPE_STRING) {
+            code += "      " + type_id + " => fbBuilder.writeString(" + fname +
+                    " as String? ?? (throw StateError('" + fname +
+                    " must be String when type is " + type_id + "'))),\n";
+          } else if (uval.union_type.base_type == BASE_TYPE_STRUCT &&
+                    uval.union_type.struct_def && !uval.union_type.struct_def->fixed) {
+            if (pack) {
+              const auto obj_type = namer_.ObjectType(*uval.union_type.struct_def);
+              code += "      " + type_id + " => (" + fname + " as " + obj_type + "?)" +
+                      "?.pack(fbBuilder) ?? (throw StateError('" + fname +
+                      " must be " + obj_type + " when type is " + type_id + "')),\n";
+            } else {
+              const auto builder_type = namer_.Type(*uval.union_type.struct_def) + "ObjectBuilder";
+              code += "      " + type_id + " => (" + fname + " as " + builder_type + "?)" +
+                      "?.getOrCreateOffset(fbBuilder) ?? (throw StateError('" + fname +
+                      " must be " + builder_type + " when type is " + type_id + "')),\n";
+            }
+          }
+        }
+
+        code += "    };\n\n";
+        continue;  // Skip to next field
+      }
+
+      // Handle non-union fields (keep your existing logic)
       if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type))
         continue;
 
       const std::string fname = namer_.Variable(field);
       std::string offset_name = fname + "Offset";
 
-      if (field.value.type.base_type == BASE_TYPE_UNION) {
-        code += "    int? " + offset_name + ";\n";
-        code += "    switch (" + fname + "Type) {\n";
-        code += "      case TestUnionTypeId.NONE:\n";
-        code += "      case null:\n";
-        code += "        " + offset_name + " = 0;\n";
-        code += "        break;\n";
-        code += "      case TestUnionTypeId.test_table:\n";
-        code += "        " + offset_name + " = (testUnion as TestTableObjectBuilder?)?.finish(fbBuilder);\n";
-        code += "        break;\n";
-        code += "      case TestUnionTypeId.test_string:\n";
-        code += "        " + offset_name + " = fbBuilder.writeString(testUnion as String);\n";
-        code += "        break;\n";
-        code += "    }\n";
-      } else {
-          code += "    final int? " + offset_name;
-          if (IsVector(field.value.type)) {
-            code += " = " + fname + " == null ? null\n";
-            code += "        : fbBuilder.writeList";
-            switch (field.value.type.VectorType().base_type) {
-              case BASE_TYPE_STRING:
-                code +=
-                    "(" + fname + "!.map(fbBuilder.writeString).toList());\n";
-                break;
-              case BASE_TYPE_STRUCT:
-                if (field.value.type.struct_def->fixed) {
-                  code += "OfStructs(" + fname + "!);\n";
-                } else {
-                  code += "(" + fname + "!.map((b) => b." +
-                          (pack ? "pack" : "getOrCreateOffset") +
-                          "(fbBuilder)).toList());\n";
-                }
-                break;
-              default:
-                code +=
-                    GenType(field.value.type.VectorType()) + "(" + fname + "!";
-                if (field.value.type.enum_def) {
-                  code += ".map((f) => f.value).toList()";
-                }
-                code += ");\n";
+      code += "    final int? " + offset_name;
+      if (IsVector(field.value.type)) {
+        code += " = " + fname + " == null ? null\n";
+        code += "        : fbBuilder.writeList";
+        switch (field.value.type.VectorType().base_type) {
+          case BASE_TYPE_STRING:
+            code += "(" + fname + "!.map(fbBuilder.writeString).toList());\n";
+            break;
+          case BASE_TYPE_STRUCT:
+            if (field.value.type.struct_def->fixed) {
+              code += "OfStructs(" + fname + "!);\n";
+            } else {
+              code += "(" + fname + "!.map((b) => b." +
+                      (pack ? "pack" : "getOrCreateOffset") +
+                      "(fbBuilder)).toList());\n";
             }
-          } else if (IsString(field.value.type)) {
-            code += " = " + fname + " == null ? null\n";
-            code += "        : fbBuilder.writeString(" + fname + "!);\n";
-          } else {
-            code += " = " + fname + "?." +
-                    (pack ? "pack" : "getOrCreateOffset") + "(fbBuilder);\n";
-          }
+            break;
+          default:
+            code += GenType(field.value.type.VectorType()) + "(" + fname + "!";
+            if (field.value.type.enum_def) {
+              code += ".map((f) => f.value).toList()";
+            }
+            code += ");\n";
+        }
+      } else if (IsString(field.value.type)) {
+        code += " = " + fname + " == null ? null\n";
+        code += "        : fbBuilder.writeString(" + fname + "!);\n";
+      } else {
+        code += " = " + fname + "?.";
+        code += (pack ? "pack" : "getOrCreateOffset");
+        code += "(fbBuilder);\n";
       }
     }
 
     if (struct_def.fixed) {
-      code += StructObjectBuilderBody(non_deprecated_fields, false,
-                                      pack);
+      code += StructObjectBuilderBody(non_deprecated_fields, prependUnderscore, pack);
     } else {
-      code += TableObjectBuilderBody(struct_def, non_deprecated_fields,
-                                     false, pack);
+      code += TableObjectBuilderBody(struct_def, non_deprecated_fields, prependUnderscore, pack);
     }
+
     return code;
   }
 

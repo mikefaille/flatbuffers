@@ -60,7 +60,8 @@ class _MonsterReader extends fb.TableReader<Monster> {
 
 class MonsterObjectBuilder extends fb.ObjectBuilder {
 
-  MonsterObjectBuilder();
+  MonsterObjectBuilder({
+  });
 
   /// Finish building, and store into the [fbBuilder].
   @override
