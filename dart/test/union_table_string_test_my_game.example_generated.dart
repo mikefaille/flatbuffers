@@ -190,19 +190,11 @@ class RootTableT implements fb.Packable {
 
   @override
   int pack(fb.Builder fbBuilder) {
-    int? testUnionOffset;
-    switch (testUnionType) {
-      case TestUnionTypeId.NONE:
-      case null:
-        testUnionOffset = 0;
-        break;
-      case TestUnionTypeId.test_table:
-        testUnionOffset = (testUnion as TestTableObjectBuilder?)?.finish(fbBuilder);
-        break;
-      case TestUnionTypeId.test_string:
-        testUnionOffset = fbBuilder.writeString(testUnion as String);
-        break;
-    }
+    final int testUnionOffset = switch (testUnionType) {
+      null || TestUnionTypeId.NONE => 0,
+      TestUnionTypeId.test_table => (testUnion as TestTableT?)?.pack(fbBuilder) ?? (throw StateError('testUnion must be TestTableT when type is TestUnionTypeId.test_table')), // pack
+      TestUnionTypeId.test_string => fbBuilder.writeString(testUnion as String? ?? (throw StateError('testUnion must be String when type is TestUnionTypeId.test_string'))),
+    };
     fbBuilder.startTable(2);
     fbBuilder.addUint8(0, testUnionType?.value ?? 0);
     fbBuilder.addOffset(1, testUnionOffset);
@@ -258,19 +250,11 @@ class RootTableObjectBuilder extends fb.ObjectBuilder {
   /// Finish building, and store into the [fbBuilder].
   @override
   int finish(fb.Builder fbBuilder) {
-    int? testUnionOffset;
-    switch (testUnionType) {
-      case TestUnionTypeId.NONE:
-      case null:
-        testUnionOffset = 0;
-        break;
-      case TestUnionTypeId.test_table:
-        testUnionOffset = (testUnion as TestTableObjectBuilder?)?.finish(fbBuilder);
-        break;
-      case TestUnionTypeId.test_string:
-        testUnionOffset = fbBuilder.writeString(testUnion as String);
-        break;
-    }
+    final int testUnionOffset = switch (testUnionType) {
+      null || TestUnionTypeId.NONE => 0,
+      TestUnionTypeId.test_table => (testUnion as TestTableObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('testUnion must be TestTableObjectBuilder when type is TestUnionTypeId.test_table')), // getOrCreateOffset
+      TestUnionTypeId.test_string => fbBuilder.writeString(testUnion as String? ?? (throw StateError('testUnion must be String when type is TestUnionTypeId.test_string'))),
+    };
     fbBuilder.startTable(2);
     fbBuilder.addUint8(0, testUnionType?.value ?? 0);
     fbBuilder.addOffset(1, testUnionOffset);

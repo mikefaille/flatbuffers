@@ -1220,7 +1220,8 @@ class DartGenerator : public BaseGenerator {
     std::string offset_name = fname + "Offset";
 
     code += "    final int " + offset_name + " = switch (" + fname + "Type) {\n";
-    code += "      null || " + enum_name + ".NONE => 0,\n";
+    code += "      null => 0,\n";
+    code += "      " + enum_name + ".NONE => 0,\n";
 
     for (auto it = uenum.Vals().begin(); it != uenum.Vals().end(); ++it) {
       const EnumVal &uval = **it;

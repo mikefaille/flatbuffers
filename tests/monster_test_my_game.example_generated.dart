@@ -1391,12 +1391,12 @@ class MonsterT implements fb.Packable {
     final int? inventoryOffset = inventory == null ? null
         : fbBuilder.writeListUint8(inventory!);
     final int testOffset = switch (testType) {
-      null || AnyTypeId.NONE => 0,
-      AnyTypeId.Monster => (test as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('test must be MonsterT when type is AnyTypeId.Monster')),
-      AnyTypeId.TestSimpleTableWithEnum => (test as TestSimpleTableWithEnumT?)?.pack(fbBuilder) ?? (throw StateError('test must be TestSimpleTableWithEnumT when type is AnyTypeId.TestSimpleTableWithEnum')),
-      AnyTypeId.MyGame_Example2_Monster => (test as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('test must be MonsterT when type is AnyTypeId.MyGame_Example2_Monster')),
+      null => 0,
+      AnyTypeId.NONE => 0,
+      AnyTypeId.Monster => (test as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('test must be MonsterT when type is AnyTypeId.Monster')), // pack
+      AnyTypeId.TestSimpleTableWithEnum => (test as TestSimpleTableWithEnumT?)?.pack(fbBuilder) ?? (throw StateError('test must be TestSimpleTableWithEnumT when type is AnyTypeId.TestSimpleTableWithEnum')), // pack
+      AnyTypeId.MyGame_Example2_Monster => (test as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('test must be MonsterT when type is AnyTypeId.MyGame_Example2_Monster')), // pack
     };
-
     final int? test4Offset = test4 == null ? null
         : fbBuilder.writeListOfStructs(test4!);
     final int? testarrayofstringOffset = testarrayofstring == null ? null
@@ -1433,19 +1433,19 @@ class MonsterT implements fb.Packable {
     final int? vectorOfNonOwningReferencesOffset = vectorOfNonOwningReferences == null ? null
         : fbBuilder.writeListUint64(vectorOfNonOwningReferences!);
     final int anyUniqueOffset = switch (anyUniqueType) {
-      null || AnyUniqueAliasesTypeId.NONE => 0,
-      AnyUniqueAliasesTypeId.M => (anyUnique as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyUnique must be MonsterT when type is AnyUniqueAliasesTypeId.M')),
-      AnyUniqueAliasesTypeId.TS => (anyUnique as TestSimpleTableWithEnumT?)?.pack(fbBuilder) ?? (throw StateError('anyUnique must be TestSimpleTableWithEnumT when type is AnyUniqueAliasesTypeId.TS')),
-      AnyUniqueAliasesTypeId.M2 => (anyUnique as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyUnique must be MonsterT when type is AnyUniqueAliasesTypeId.M2')),
+      null => 0,
+      AnyUniqueAliasesTypeId.NONE => 0,
+      AnyUniqueAliasesTypeId.M => (anyUnique as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyUnique must be MonsterT when type is AnyUniqueAliasesTypeId.M')), // pack
+      AnyUniqueAliasesTypeId.TS => (anyUnique as TestSimpleTableWithEnumT?)?.pack(fbBuilder) ?? (throw StateError('anyUnique must be TestSimpleTableWithEnumT when type is AnyUniqueAliasesTypeId.TS')), // pack
+      AnyUniqueAliasesTypeId.M2 => (anyUnique as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyUnique must be MonsterT when type is AnyUniqueAliasesTypeId.M2')), // pack
     };
-
     final int anyAmbiguousOffset = switch (anyAmbiguousType) {
-      null || AnyAmbiguousAliasesTypeId.NONE => 0,
-      AnyAmbiguousAliasesTypeId.M1 => (anyAmbiguous as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterT when type is AnyAmbiguousAliasesTypeId.M1')),
-      AnyAmbiguousAliasesTypeId.M2 => (anyAmbiguous as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterT when type is AnyAmbiguousAliasesTypeId.M2')),
-      AnyAmbiguousAliasesTypeId.M3 => (anyAmbiguous as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterT when type is AnyAmbiguousAliasesTypeId.M3')),
+      null => 0,
+      AnyAmbiguousAliasesTypeId.NONE => 0,
+      AnyAmbiguousAliasesTypeId.M1 => (anyAmbiguous as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterT when type is AnyAmbiguousAliasesTypeId.M1')), // pack
+      AnyAmbiguousAliasesTypeId.M2 => (anyAmbiguous as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterT when type is AnyAmbiguousAliasesTypeId.M2')), // pack
+      AnyAmbiguousAliasesTypeId.M3 => (anyAmbiguous as MonsterT?)?.pack(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterT when type is AnyAmbiguousAliasesTypeId.M3')), // pack
     };
-
     final int? vectorOfEnumsOffset = vectorOfEnums == null ? null
         : fbBuilder.writeListUint8(vectorOfEnums!.map((f) => f.value).toList());
     final int? testrequirednestedflatbufferOffset = testrequirednestedflatbuffer == null ? null
@@ -1931,12 +1931,12 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     final int? inventoryOffset = inventory == null ? null
         : fbBuilder.writeListUint8(inventory!);
     final int testOffset = switch (testType) {
-      null || AnyTypeId.NONE => 0,
-      AnyTypeId.Monster => (test as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('test must be MonsterObjectBuilder when type is AnyTypeId.Monster')),
-      AnyTypeId.TestSimpleTableWithEnum => (test as TestSimpleTableWithEnumObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('test must be TestSimpleTableWithEnumObjectBuilder when type is AnyTypeId.TestSimpleTableWithEnum')),
-      AnyTypeId.MyGame_Example2_Monster => (test as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('test must be MonsterObjectBuilder when type is AnyTypeId.MyGame_Example2_Monster')),
+      null => 0,
+      AnyTypeId.NONE => 0,
+      AnyTypeId.Monster => (test as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('test must be MonsterObjectBuilder when type is AnyTypeId.Monster')), // getOrCreateOffset
+      AnyTypeId.TestSimpleTableWithEnum => (test as TestSimpleTableWithEnumObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('test must be TestSimpleTableWithEnumObjectBuilder when type is AnyTypeId.TestSimpleTableWithEnum')), // getOrCreateOffset
+      AnyTypeId.MyGame_Example2_Monster => (test as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('test must be MonsterObjectBuilder when type is AnyTypeId.MyGame_Example2_Monster')), // getOrCreateOffset
     };
-
     final int? test4Offset = test4 == null ? null
         : fbBuilder.writeListOfStructs(test4!);
     final int? testarrayofstringOffset = testarrayofstring == null ? null
@@ -1973,19 +1973,19 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     final int? vectorOfNonOwningReferencesOffset = vectorOfNonOwningReferences == null ? null
         : fbBuilder.writeListUint64(vectorOfNonOwningReferences!);
     final int anyUniqueOffset = switch (anyUniqueType) {
-      null || AnyUniqueAliasesTypeId.NONE => 0,
-      AnyUniqueAliasesTypeId.M => (anyUnique as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyUnique must be MonsterObjectBuilder when type is AnyUniqueAliasesTypeId.M')),
-      AnyUniqueAliasesTypeId.TS => (anyUnique as TestSimpleTableWithEnumObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyUnique must be TestSimpleTableWithEnumObjectBuilder when type is AnyUniqueAliasesTypeId.TS')),
-      AnyUniqueAliasesTypeId.M2 => (anyUnique as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyUnique must be MonsterObjectBuilder when type is AnyUniqueAliasesTypeId.M2')),
+      null => 0,
+      AnyUniqueAliasesTypeId.NONE => 0,
+      AnyUniqueAliasesTypeId.M => (anyUnique as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyUnique must be MonsterObjectBuilder when type is AnyUniqueAliasesTypeId.M')), // getOrCreateOffset
+      AnyUniqueAliasesTypeId.TS => (anyUnique as TestSimpleTableWithEnumObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyUnique must be TestSimpleTableWithEnumObjectBuilder when type is AnyUniqueAliasesTypeId.TS')), // getOrCreateOffset
+      AnyUniqueAliasesTypeId.M2 => (anyUnique as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyUnique must be MonsterObjectBuilder when type is AnyUniqueAliasesTypeId.M2')), // getOrCreateOffset
     };
-
     final int anyAmbiguousOffset = switch (anyAmbiguousType) {
-      null || AnyAmbiguousAliasesTypeId.NONE => 0,
-      AnyAmbiguousAliasesTypeId.M1 => (anyAmbiguous as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterObjectBuilder when type is AnyAmbiguousAliasesTypeId.M1')),
-      AnyAmbiguousAliasesTypeId.M2 => (anyAmbiguous as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterObjectBuilder when type is AnyAmbiguousAliasesTypeId.M2')),
-      AnyAmbiguousAliasesTypeId.M3 => (anyAmbiguous as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterObjectBuilder when type is AnyAmbiguousAliasesTypeId.M3')),
+      null => 0,
+      AnyAmbiguousAliasesTypeId.NONE => 0,
+      AnyAmbiguousAliasesTypeId.M1 => (anyAmbiguous as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterObjectBuilder when type is AnyAmbiguousAliasesTypeId.M1')), // getOrCreateOffset
+      AnyAmbiguousAliasesTypeId.M2 => (anyAmbiguous as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterObjectBuilder when type is AnyAmbiguousAliasesTypeId.M2')), // getOrCreateOffset
+      AnyAmbiguousAliasesTypeId.M3 => (anyAmbiguous as MonsterObjectBuilder?)?.getOrCreateOffset(fbBuilder) ?? (throw StateError('anyAmbiguous must be MonsterObjectBuilder when type is AnyAmbiguousAliasesTypeId.M3')), // getOrCreateOffset
     };
-
     final int? vectorOfEnumsOffset = vectorOfEnums == null ? null
         : fbBuilder.writeListUint8(vectorOfEnums!.map((f) => f.value).toList());
     final int? testrequirednestedflatbufferOffset = testrequirednestedflatbuffer == null ? null

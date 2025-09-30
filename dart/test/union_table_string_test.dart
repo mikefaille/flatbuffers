@@ -57,4 +57,20 @@ void main() {
     final union = result.testUnion as String;
     expect(union, 'test_string');
   });
+
+  test('Object-API: union of table and string (null)', () {
+    final builder = Builder(initialSize: 256);
+
+    final root = RootTableObjectBuilder(
+      testUnionType: TestUnionTypeId.NONE,
+      testUnion: null,
+    );
+
+    builder.finish(root.finish(builder));
+    final buffer = builder.buffer;
+
+    final result = RootTable(buffer);
+    expect(result.testUnionType, TestUnionTypeId.NONE);
+    expect(result.testUnion, isNull);
+  });
 }
